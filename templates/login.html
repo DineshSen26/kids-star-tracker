@@ -1,0 +1,20 @@
+{% extends "layout.html" %}
+{% block content %}
+<div class="login-shell">
+    <div class="panel login-panel">
+        <h2>Parent Login</h2>
+        {% if google_login_enabled %}
+        <p class="text-muted">Use your approved parent Gmail account.</p>
+        <a class="btn btn-light btn-lg rounded-pill google-btn" href="{{ url_for('main.google_login') }}">
+            <i class="fa-brands fa-google"></i> Continue with Google
+        </a>
+        {% else %}
+        <p class="text-muted">Default password: parent123</p>
+        <form method="post" class="vstack gap-3">
+            <input class="form-control form-control-lg" type="password" name="password" placeholder="Password" required autofocus>
+            <button class="btn btn-primary btn-lg rounded-pill"><i class="fa-solid fa-lock"></i> Login</button>
+        </form>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

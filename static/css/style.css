@@ -1,0 +1,358 @@
+:root {
+    --ink: #243047;
+    --muted: #687189;
+    --panel: rgba(255, 255, 255, 0.92);
+    --brand: #6c63ff;
+    --pink: #ff5fa2;
+    --mint: #27c9a5;
+    --sun: #ffc83d;
+    --sky: #37a2ff;
+    --shadow: 0 18px 45px rgba(34, 45, 84, 0.14);
+}
+
+[data-theme="dark"] {
+    --ink: #f7f8ff;
+    --muted: #c7cbe0;
+    --panel: rgba(31, 36, 58, 0.94);
+    --shadow: 0 18px 45px rgba(0, 0, 0, 0.34);
+}
+
+body {
+    color: var(--ink);
+    min-height: 100vh;
+    background:
+        radial-gradient(circle at 10% 10%, rgba(255, 200, 61, 0.35), transparent 28%),
+        radial-gradient(circle at 90% 20%, rgba(255, 95, 162, 0.25), transparent 26%),
+        linear-gradient(135deg, #e7f7ff 0%, #fff4db 45%, #ffe8f2 100%);
+    font-family: "Trebuchet MS", Arial, sans-serif;
+}
+
+[data-theme="dark"] body {
+    background: linear-gradient(135deg, #171b2e 0%, #26223b 48%, #12313c 100%);
+}
+
+.glass-nav {
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(14px);
+    box-shadow: 0 8px 24px rgba(45, 55, 90, 0.08);
+}
+
+[data-theme="dark"] .glass-nav {
+    background: rgba(18, 22, 36, 0.86);
+}
+
+.nav-link,
+.navbar-brand {
+    color: var(--ink);
+}
+
+.page-hero {
+    padding: 48px 0 28px;
+}
+
+.page-hero h1 {
+    font-size: clamp(2.2rem, 6vw, 4.8rem);
+    font-weight: 900;
+    line-height: 1;
+    color: var(--ink);
+}
+
+.hero-copy,
+.text-muted {
+    color: var(--muted) !important;
+}
+
+.date-pill,
+.sparkle-stack span,
+.fun-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    border-radius: 999px;
+    padding: 8px 14px;
+    background: var(--panel);
+    box-shadow: var(--shadow);
+}
+
+.sparkle-stack {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.sparkle-stack span:nth-child(1) { border: 2px solid var(--sun); }
+.sparkle-stack span:nth-child(2) { border: 2px solid var(--mint); }
+.sparkle-stack span:nth-child(3) { border: 2px solid var(--pink); }
+
+.panel,
+.kid-card,
+.task-card,
+.reward-card {
+    background: var(--panel);
+    border: 1px solid rgba(255, 255, 255, 0.72);
+    border-radius: 8px;
+    box-shadow: var(--shadow);
+}
+
+.panel,
+.kid-card {
+    padding: 24px;
+}
+
+.kid-card,
+.task-card,
+.reward-card,
+.mini-report {
+    transition: transform 0.22s ease, box-shadow 0.22s ease;
+}
+
+.kid-card:hover,
+.task-card:hover,
+.reward-card:hover {
+    transform: translateY(-4px);
+}
+
+.avatar {
+    width: 78px;
+    height: 78px;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    color: white;
+    font-size: 2rem;
+    background: linear-gradient(135deg, var(--brand), var(--pink));
+    box-shadow: 0 12px 30px rgba(108, 99, 255, 0.35);
+}
+
+.stat-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 12px;
+}
+
+.stat-grid div,
+.mini-report {
+    background: rgba(255, 255, 255, 0.52);
+    border-radius: 8px;
+    padding: 14px;
+}
+
+[data-theme="dark"] .stat-grid div,
+[data-theme="dark"] .mini-report {
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.stat-grid strong {
+    display: block;
+    font-size: 1.7rem;
+    color: var(--brand);
+}
+
+.stat-grid span,
+.activity-line span {
+    color: var(--muted);
+}
+
+.star-progress {
+    height: 14px;
+    border-radius: 999px;
+}
+
+.star-progress .progress-bar {
+    background: linear-gradient(90deg, var(--mint), var(--sun), var(--pink));
+    animation: fillbar 0.8s ease both;
+}
+
+@keyframes fillbar {
+    from { width: 0; }
+}
+
+.section-mini {
+    font-size: 1.1rem;
+    font-weight: 800;
+}
+
+.leader-row,
+.reward-status {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 12px 0;
+    border-bottom: 1px solid rgba(100, 110, 140, 0.18);
+}
+
+.rank {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    display: inline-grid;
+    place-items: center;
+    color: #312600;
+    font-weight: 900;
+    background: var(--sun);
+}
+
+.difference {
+    margin-top: 16px;
+    color: var(--pink);
+    font-weight: 900;
+}
+
+.task-board,
+.reward-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 18px;
+}
+
+.task-card,
+.reward-card {
+    padding: 22px;
+}
+
+.task-card {
+    display: flex;
+    min-height: 180px;
+    flex-direction: column;
+    justify-content: space-between;
+    background: linear-gradient(145deg, rgba(255, 255, 255, 0.95), rgba(240, 251, 255, 0.9));
+}
+
+[data-theme="dark"] .task-card {
+    background: var(--panel);
+}
+
+.task-card h3,
+.reward-card h3,
+.panel h2,
+.kid-card h2 {
+    font-weight: 900;
+}
+
+.star-string {
+    color: var(--sun);
+    font-size: 1.4rem;
+    letter-spacing: 0;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, var(--brand), var(--sky));
+    border: 0;
+}
+
+.btn-success {
+    background: linear-gradient(135deg, var(--mint), #5cdc6f);
+    border: 0;
+}
+
+.icon-btn {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    background: var(--panel);
+    color: var(--ink);
+}
+
+.search-box {
+    max-width: 260px;
+}
+
+.tiny-input {
+    max-width: 84px;
+}
+
+.badge-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.fun-badge {
+    padding: 6px 10px;
+    font-size: 0.85rem;
+    box-shadow: none;
+    background: rgba(255, 200, 61, 0.25);
+}
+
+.unlocked {
+    color: var(--mint);
+}
+
+.login-shell {
+    min-height: 45vh;
+    display: grid;
+    place-items: center;
+}
+
+.login-panel {
+    width: min(100%, 440px);
+}
+
+.google-btn {
+    width: 100%;
+    border: 1px solid rgba(100, 110, 140, 0.24);
+    color: var(--ink);
+    background: rgba(255, 255, 255, 0.82);
+}
+
+.google-btn:hover {
+    color: var(--ink);
+    background: white;
+}
+
+.fly-star,
+.confetti-piece {
+    position: fixed;
+    pointer-events: none;
+    z-index: 9999;
+}
+
+.fly-star {
+    color: var(--sun);
+    font-size: 2rem;
+    animation: fly 0.8s ease-out forwards;
+}
+
+@keyframes fly {
+    to { transform: translateY(-90px) scale(1.5) rotate(24deg); opacity: 0; }
+}
+
+.confetti-piece {
+    width: 10px;
+    height: 16px;
+    animation: fall 1.2s ease-in forwards;
+}
+
+@keyframes fall {
+    to { transform: translateY(220px) rotate(480deg); opacity: 0; }
+}
+
+@media (max-width: 680px) {
+    .stat-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .page-hero {
+        padding-top: 28px;
+    }
+
+    .panel,
+    .kid-card {
+        padding: 18px;
+    }
+
+    .avatar {
+        width: 62px;
+        height: 62px;
+    }
+}
+
+@media print {
+    .glass-nav,
+    .page-hero,
+    form,
+    .btn {
+        display: none !important;
+    }
+}

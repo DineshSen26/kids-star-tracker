@@ -1,0 +1,82 @@
+{% extends "layout.html" %}
+{% block content %}
+<section class="row g-4">
+    {% for item in stats %}
+    <div class="col-lg-6">
+        <article class="kid-card h-100">
+            <div class="d-flex align-items-center gap-3">
+                <div class="avatar"><i class="{{ item.child.avatar }}"></i></div>
+                <div class="flex-grow-1">
+                    <h2>{{ item.child.name }}</h2>
+                    <div class="progress star-progress">
+                        <div class="progress-bar" style="width: {{ item.completion_percent }}%"></div>
+                    </div>
+                </div>
+                <a class="btn btn-lg btn-primary rounded-pill" href="{{ url_for('main.child_page', child_id=item.child.id) }}">Tasks</a>
+            </div>
+            <div class="stat-grid mt-4">
+                <div><strong>{{ item.daily }}</strong><span>Today</span></div>
+                <div><strong>{{ item.weekly }}</strong><span>Week</span></div>
+                <div><strong>{{ item.monthly }}</strong><span>Month</span></div>
+                <div><strong>{{ item.streak }}</strong><span>Streak</span></div>
+            </div>
+            <div class="row g-3 mt-2">
+                <div class="col-md-7"><canvas class="starChart" data-child="{{ item.child.name }}"></canvas></div>
+                <div class="col-md-5">
+                    <h3 class="section-mini">Recent Tasks</h3>
+                    {% for done in item.recent %}
+                        <p class="activity-line mb-2"><i class="fa-solid fa-circle-check"></i> {{ done.task.title }} <span>{{ done.task.stars }} stars</span></p>
+                    {% else %}
+                        <p class="text-muted">No completed tasks yet.</p>
+                    {% endfor %}
+                </div>
+            </div>
+        </article>
+    </div>
+    {% endfor %}
+</section>
+
+<section class="row g-4 mt-1">
+    <div class="col-lg-8">
+        <div class="panel">
+            <h2>Dashboard Statistics</h2>
+            <div class="row g-3">
+                {% for item in stats %}
+                <div class="col-md-6">
+                    <div class="mini-report">
+                        <h3>{{ item.child.name }}</h3>
+                        <p>Completed today: <strong>{{ item.completed_today }}</strong></p>
+                        <p>Pending: <strong>{{ item.pending_today }}</strong></p>
+                        <p>Completion: <strong>{{ item.completion_percent }}%</strong></p>
+                        <p>Best streak: <strong>{{ item.best_streak }}</strong></p>
+                        <p>Average stars/day: <strong>{{ item.average }}</strong></p>
+                        <div class="badge-row">
+                            {% for badge in item.badges %}<span class="fun-badge"><i class="fa-solid fa-award"></i> {{ badge }}</span>{% endfor %}
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-4">
+        <div class="panel leaderboard">
+            <h2>Leaderboard</h2>
+            {% for item in leaderboard %}
+                <div class="leader-row">
+                    <span class="rank">{{ loop.index }}</span>
+                    <span>{{ item.child.name }}</span>
+                    <strong>{{ item.total }} Stars</strong>
+                </div>
+            {% endfor %}
+            <p class="difference">Difference: +{{ difference }} Stars</p>
+        </div>
+    </div>
+</section>
+{% endblock %}
+{% block scripts %}
+<script>
+window.chartPayload = {{ chart_payload | tojson }};
+renderDashboardCharts();
+</script>
+{% endblock %}

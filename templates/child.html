@@ -1,0 +1,29 @@
+{% extends "layout.html" %}
+{% block content %}
+<div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
+    <div class="d-flex align-items-center gap-3">
+        <div class="avatar"><i class="{{ child.avatar }}"></i></div>
+        <div>
+            <h2 class="mb-1">{{ child.name }}'s Tasks</h2>
+            <p class="mb-0 text-muted">{{ stats.daily }} stars earned today</p>
+        </div>
+    </div>
+    <a class="btn btn-outline-primary rounded-pill" href="{{ url_for('main.dashboard') }}">Back</a>
+</div>
+
+<section class="task-board">
+    {% for task in tasks %}
+    <article class="task-card">
+        <div>
+            <h3>{{ task.title }}</h3>
+            <p class="star-string">{{ "★" * task.stars }}</p>
+        </div>
+        <form method="post" action="{{ url_for('main.complete_task', task_id=task.id, child_id=child.id) }}" class="complete-form">
+            <button class="btn btn-success btn-lg rounded-pill" {% if task.id in done_ids %}disabled{% endif %}>
+                {% if task.id in done_ids %}<i class="fa-solid fa-check"></i> Done{% else %}<i class="fa-solid fa-star"></i> Complete{% endif %}
+            </button>
+        </form>
+    </article>
+    {% endfor %}
+</section>
+{% endblock %}
