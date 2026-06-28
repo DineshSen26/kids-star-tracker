@@ -11,14 +11,23 @@ from models import Child, Completion, Reward, Task, db
 from routes import main, today
 
 
+def database_uri(app_root_path: str) -> str:
+    url = os.environ.get("DATABASE_URL")
+    if url:
+        if url.startswith("postgres://"):
+            url = url.replace("postgres://", "postgresql://", 1)
+        return url
+    database_path = os.path.join(app_root_path, "database.db")
+    return f"sqlite:///{database_path}"
+
+
 def create_app() -> Flask:
     app = Flask(__name__)
-    database_path = os.path.join(app.root_path, "database.db")
     app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_prefix=1)
     app.config["SECRET_KEY"] = os.environ.get(
         "SECRET_KEY", "dev-secret-change-me-for-production"
     )
-    app.config["SQLALCHEMY_DATABASE_URI"] = f"sqlite:///{database_path}"
+    app.config["SQLALCHEMY_DATABASE_URI"] = database_uri(app.root_path)
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
     app.config["PARENT_PASSWORD_HASH"] = os.environ.get(
         "PARENT_PASSWORD_HASH", generate_password_hash("parent123")

@@ -83,13 +83,18 @@ Alternative free Flask hosting: PythonAnywhere. Use `wsgi.py` as the WSGI entry 
 
 ## Database
 
-SQLite is created automatically on first run at:
+Local development uses SQLite (`database.db`), created automatically on first run.
 
-```text
-database.db
-```
+Production on Render must use PostgreSQL. Render's web service filesystem is ephemeral, so SQLite data is lost whenever the app restarts, redeploys, or wakes from sleep. That is why tasks can disappear after refresh or login later.
 
-Sample data for Atharv, Ishanvi, tasks, rewards, and completions is generated automatically.
+### Render PostgreSQL setup
+
+1. In Render, click **New +** -> **PostgreSQL** and create a free database.
+2. Open your web service -> **Environment** -> **Add Environment Variable**.
+3. Choose **Add from database** and select your Postgres instance as `DATABASE_URL`.
+4. Save and wait for the redeploy to finish.
+
+Sample data for Atharv, Ishanvi, tasks, rewards, and completions is generated automatically only when the database is empty.
 
 ## Screenshots
 
