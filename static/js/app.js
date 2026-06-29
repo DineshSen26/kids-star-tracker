@@ -85,6 +85,55 @@ function successSound() {
     });
 }
 
+function celebrationMessage(childName) {
+    const messages = [
+        `Hey ${childName}! You have done a great job!`,
+        `Amazing work, ${childName}! Keep shining bright!`,
+        `Wow ${childName}! You are a superstar today!`,
+        `Fantastic, ${childName}! I am so proud of you!`,
+    ];
+    return messages[Math.floor(Math.random() * messages.length)];
+}
+
+function pickFriendlyVoice() {
+    const voices = window.speechSynthesis?.getVoices() || [];
+    return (
+        voices.find((voice) => voice.lang.startsWith("en") && /female|samantha|zira|google uk english female/i.test(voice.name))
+        || voices.find((voice) => voice.lang.startsWith("en"))
+        || voices[0]
+    );
+}
+
+function speakCelebration(childName) {
+    if (!childName || !window.speechSynthesis) {
+        successSound();
+        return;
+    }
+
+    successSound();
+
+    const speak = () => {
+        window.speechSynthesis.cancel();
+        const utterance = new SpeechSynthesisUtterance(celebrationMessage(childName));
+        utterance.rate = 0.92;
+        utterance.pitch = 1.15;
+        utterance.volume = 1;
+        const voice = pickFriendlyVoice();
+        if (voice) {
+            utterance.voice = voice;
+        }
+        window.speechSynthesis.speak(utterance);
+    };
+
+    const voices = window.speechSynthesis.getVoices();
+    if (voices.length) {
+        speak();
+        return;
+    }
+
+    window.speechSynthesis.addEventListener("voiceschanged", speak, { once: true });
+}
+
 document.addEventListener("DOMContentLoaded", () => {
     const savedTheme = localStorage.getItem("kids-star-theme") || "light";
     document.documentElement.dataset.theme = savedTheme;
@@ -107,7 +156,7 @@ document.addEventListener("DOMContentLoaded", () => {
             flyStar(button);
             burstConfetti();
             try {
-                successSound();
+                speakCelebration(form.dataset.childName);
             } catch {
                 // Some browsers require a user gesture before sound; the task still completes.
             }
@@ -121,6 +170,13 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("taskSearch")?.addEventListener("input", (event) => {
         const query = event.target.value.toLowerCase();
         document.querySelectorAll("#taskTable tr").forEach((row) => {
+            row.style.display = row.textContent.toLowerCase().includes(query) ? "" : "none";
+        });
+    });
+
+    document.getElementById("rewardSearch")?.addEventListener("input", (event) => {
+        const query = event.target.value.toLowerCase();
+        document.querySelectorAll("#rewardTable tr").forEach((row) => {
             row.style.display = row.textContent.toLowerCase().includes(query) ? "" : "none";
         });
     });

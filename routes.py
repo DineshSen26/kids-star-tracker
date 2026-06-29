@@ -301,20 +301,32 @@ def rewards():
     if guard:
         return guard
     if request.method == "POST":
-        db.session.add(
-            Reward(
-                title=request.form["title"].strip(),
-                required_stars=max(request.form.get("required_stars", type=int) or 1, 1),
-            )
+        reward_id = request.form.get("reward_id", type=int)
+        reward = Reward.query.get(reward_id) if reward_id else Reward()
+        reward.title = request.form["title"].strip()
+        reward.required_stars = max(
+            request.form.get("required_stars", type=int) or 1, 1
         )
+        db.session.add(reward)
         db.session.commit()
-        flash("Reward added.", "success")
+        flash("Reward saved.", "success")
         return redirect(url_for("main.rewards"))
     return render_template(
         "rewards.html",
         rewards=Reward.query.order_by(Reward.required_stars).all(),
         stats=[child_stats(child) for child in children()],
     )
+
+
+@main.post("/reward/delete/<int:reward_id>")
+def delete_reward(reward_id: int):
+    guard = login_required()
+    if guard:
+        return guard
+    db.session.delete(Reward.query.get_or_404(reward_id))
+    db.session.commit()
+    flash("Reward deleted.", "info")
+    return redirect(url_for("main.rewards"))
 
 
 @main.route("/history")

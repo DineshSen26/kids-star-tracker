@@ -18,7 +18,7 @@
             <h3>{{ task.title }}</h3>
             <p class="star-string">{{ "★" * task.stars }}</p>
         </div>
-        <form method="post" action="{{ url_for('main.complete_task', task_id=task.id, child_id=child.id) }}" class="complete-form">
+        <form method="post" action="{{ url_for('main.complete_task', task_id=task.id, child_id=child.id) }}" class="complete-form" data-child-name="{{ child.name }}">
             <button class="btn btn-success btn-lg rounded-pill" {% if task.id in done_ids %}disabled{% endif %}>
                 {% if task.id in done_ids %}<i class="fa-solid fa-check"></i> Done{% else %}<i class="fa-solid fa-star"></i> Complete{% endif %}
             </button>
