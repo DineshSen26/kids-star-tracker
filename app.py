@@ -17,34 +17,48 @@ def database_uri(app_root_path: str) -> str:
         if url.startswith("postgres://"):
             url = url.replace("postgres://", "postgresql://", 1)
         return url
+
     database_path = os.path.join(app_root_path, "database.db")
     return f"sqlite:///{database_path}"
 
 
 def create_app() -> Flask:
     app = Flask(__name__)
+
+    # Fix proxy issues on Render
     app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_prefix=1)
+
+    # Config
     app.config["SECRET_KEY"] = os.environ.get(
         "SECRET_KEY", "dev-secret-change-me-for-production"
     )
+
     app.config["SQLALCHEMY_DATABASE_URI"] = database_uri(app.root_path)
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+
     app.config["PARENT_PASSWORD_HASH"] = os.environ.get(
-        "PARENT_PASSWORD_HASH", generate_password_hash("parent123")
+        "PARENT_PASSWORD_HASH",
+        generate_password_hash("parent123")
     )
+
     app.config["GOOGLE_CLIENT_ID"] = os.environ.get("GOOGLE_CLIENT_ID", "")
     app.config["GOOGLE_CLIENT_SECRET"] = os.environ.get("GOOGLE_CLIENT_SECRET", "")
     app.config["GOOGLE_REDIRECT_URI"] = os.environ.get("GOOGLE_REDIRECT_URI", "")
     app.config["PREFERRED_URL_SCHEME"] = os.environ.get("PREFERRED_URL_SCHEME", "https")
+
     app.config["PARENT_EMAILS"] = [
         email.strip().lower()
         for email in os.environ.get("PARENT_EMAILS", "").split(",")
         if email.strip()
     ]
 
+    # Init DB
     db.init_app(app)
+
+    # Register routes
     app.register_blueprint(main)
 
+    # Create tables + seed data
     with app.app_context():
         db.create_all()
         seed_data()
@@ -58,6 +72,7 @@ def seed_data() -> None:
 
     atharv = Child(name="Atharv", avatar="fa-solid fa-user-astronaut")
     ishanvi = Child(name="Ishanvi", avatar="fa-solid fa-wand-magic-sparkles")
+
     db.session.add_all([atharv, ishanvi])
     db.session.flush()
 
@@ -69,16 +84,22 @@ def seed_data() -> None:
         Task(title="Drawing", stars=3, assigned_to="Ishanvi"),
         Task(title="Help Mom", stars=2, assigned_to="Both"),
     ]
+
     rewards = [
         Reward(title="Ice Cream", required_stars=100),
         Reward(title="Movie Night", required_stars=200),
         Reward(title="Toy", required_stars=300),
     ]
+
     db.session.add_all(tasks + rewards)
     db.session.flush()
 
     for child in (atharv, ishanvi):
-        assigned_tasks = [task for task in tasks if task.assigned_to in (child.name, "Both")]
+        assigned_tasks = [
+            task for task in tasks
+            if task.assigned_to in (child.name, "Both")
+        ]
+
         for offset, task in enumerate(assigned_tasks[:4]):
             db.session.add(
                 Completion(
@@ -91,5 +112,11 @@ def seed_data() -> None:
     db.session.commit()
 
 
+# ✅ IMPORTANT: expose app for Gunicorn
+app = create_app()
+
+
+# Local development only (Render will NOT use this)
 if __name__ == "__main__":
-    create_app().run(host="0.0.0.0", port=5000, debug=True)
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port, debug=True)
