@@ -1,9 +1,3 @@
-databases:
-  - name: kids-star-tracker-db
-    plan: free
-    databaseName: kids_star_tracker
-    user: kids_star_tracker
-
 services:
   - type: web
     name: kids-star-tracker
@@ -15,9 +9,7 @@ services:
       - key: SECRET_KEY
         generateValue: true
       - key: DATABASE_URL
-        fromDatabase:
-          name: kids-star-tracker-db
-          property: connectionString
+        sync: false
       - key: PREFERRED_URL_SCHEME
         value: https
       - key: GOOGLE_CLIENT_ID

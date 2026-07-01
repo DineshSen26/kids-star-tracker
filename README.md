@@ -85,14 +85,22 @@ Alternative free Flask hosting: PythonAnywhere. Use `wsgi.py` as the WSGI entry 
 
 Local development uses SQLite (`database.db`), created automatically on first run.
 
-Production on Render must use PostgreSQL. Render's web service filesystem is ephemeral, so SQLite data is lost whenever the app restarts, redeploys, or wakes from sleep. That is why tasks can disappear after refresh or login later.
+Production must use PostgreSQL (Render Postgres, Neon, or similar). Render's web service filesystem is ephemeral, so SQLite data is lost whenever the app restarts, redeploys, or wakes from sleep.
 
-### Render PostgreSQL setup
+### Neon PostgreSQL setup
 
-1. In Render, click **New +** -> **PostgreSQL** and create a free database.
-2. Open your web service -> **Environment** -> **Add Environment Variable**.
-3. Choose **Add from database** and select your Postgres instance as `DATABASE_URL`.
-4. Save and wait for the redeploy to finish.
+1. Create a database at [neon.tech](https://neon.tech) and copy the connection string.
+2. In Render, open your web service -> **Environment**.
+3. Remove any `DATABASE_URL` linked with **Add from database** (that keeps pointing at Render Postgres).
+4. Add `DATABASE_URL` manually with your Neon connection string, for example:
+
+```text
+postgresql://user:password@host/dbname?sslmode=require
+```
+
+5. Save and redeploy.
+
+If `render.yaml` uses `fromDatabase` for `DATABASE_URL`, each deploy can overwrite your Neon URL with Render's database again. Use a manual `DATABASE_URL` instead.
 
 Sample data for Atharv, Ishanvi, tasks, rewards, and completions is generated automatically only when the database is empty.
 
