@@ -2,13 +2,18 @@
 {% block content %}
 <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
     <div class="d-flex align-items-center gap-3">
-        <div class="avatar"><i class="{{ child.avatar }}"></i></div>
+        <div class="avatar"><i class="{{ kid.avatar }}"></i></div>
         <div>
-            <h2 class="mb-1">{{ child.name }}'s Tasks</h2>
-            <p class="mb-0 text-muted">{{ stats.daily }} stars earned today</p>
+            <h2 class="mb-1">{{ kid.name }}'s Tasks</h2>
+            <p class="mb-0 text-muted">{{ stats.daily }} stars earned today · {{ stats.total }} total balance</p>
         </div>
     </div>
-    <a class="btn btn-outline-primary rounded-pill" href="{{ url_for('main.dashboard') }}">Back</a>
+    <div class="d-flex gap-2">
+        {% if kid.child_login_enabled %}
+        <a class="btn btn-outline-secondary rounded-pill" href="{{ url_for('main.child_logout') }}">Logout</a>
+        {% endif %}
+        <a class="btn btn-outline-primary rounded-pill" href="{{ url_for('main.dashboard') }}">Back</a>
+    </div>
 </div>
 
 <section class="task-board">
@@ -18,12 +23,16 @@
             <h3>{{ task.title }}</h3>
             <p class="star-string">{{ "★" * task.stars }}</p>
         </div>
-        <form method="post" action="{{ url_for('main.complete_task', task_id=task.id, child_id=child.id) }}" class="complete-form" data-child-name="{{ child.name }}">
+        <form method="post" action="{{ url_for('main.complete_task', task_id=task.id, kid_id=kid.id) }}" class="complete-form" data-child-name="{{ kid.name }}">
             <button class="btn btn-success btn-lg rounded-pill" {% if task.id in done_ids %}disabled{% endif %}>
                 {% if task.id in done_ids %}<i class="fa-solid fa-check"></i> Done{% else %}<i class="fa-solid fa-star"></i> Complete{% endif %}
             </button>
         </form>
     </article>
+    {% else %}
+    <div class="panel text-center py-4">
+        <p class="text-muted mb-0">No tasks yet. Ask a parent to add some!</p>
+    </div>
     {% endfor %}
 </section>
 {% endblock %}

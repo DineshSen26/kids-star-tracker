@@ -4,14 +4,23 @@
     <div class="col-lg-4">
         <div class="panel">
             <h2>Add Task</h2>
+            {% if not kids %}
+            <p class="text-muted">Add a kid first before creating tasks.</p>
+            <a class="btn btn-primary rounded-pill" href="{{ url_for('main.kids') }}">Add Kid</a>
+            {% else %}
             <form method="post" class="vstack gap-3">
                 <input class="form-control form-control-lg" name="title" placeholder="Task name" required>
                 <input class="form-control form-control-lg" name="stars" type="number" min="1" value="2" required>
-                <select class="form-select form-select-lg" name="assigned_to">
-                    <option>Atharv</option>
-                    <option>Ishanvi</option>
-                    <option selected>Both</option>
-                </select>
+                <div>
+                    <label class="form-label">Assign to:</label>
+                    {% for kid in kids %}
+                    <label class="form-check">
+                        <input class="form-check-input" type="checkbox" name="kid_ids" value="{{ kid.id }}" checked>
+                        <span class="form-check-label">{{ kid.name }}</span>
+                    </label>
+                    {% endfor %}
+                    <p class="text-muted small mb-0">Creates a separate task row for each selected kid.</p>
+                </div>
                 <label class="form-check form-switch">
                     <input class="form-check-input" type="checkbox" name="active" checked>
                     <span class="form-check-label">Active</span>
@@ -23,6 +32,7 @@
                 <form method="post" action="{{ url_for('main.reset_period', period='weekly') }}"><button class="btn btn-outline-warning rounded-pill">Reset Week</button></form>
                 <form method="post" action="{{ url_for('main.reset_period', period='monthly') }}"><button class="btn btn-outline-danger rounded-pill">Reset Month</button></form>
             </div>
+            {% endif %}
         </div>
     </div>
     <div class="col-lg-8">
@@ -33,7 +43,7 @@
             </div>
             <div class="table-responsive mt-3">
                 <table class="table align-middle">
-                    <thead><tr><th>Task</th><th>Stars</th><th>Assigned</th><th>Status</th><th></th></tr></thead>
+                    <thead><tr><th>Task</th><th>Stars</th><th>Kid</th><th>Status</th><th></th></tr></thead>
                     <tbody id="taskTable">
                     {% for task in tasks %}
                     <tr>
@@ -43,13 +53,7 @@
                                 <input class="form-control" name="title" value="{{ task.title }}" required>
                         </td>
                         <td><input class="form-control tiny-input" name="stars" type="number" min="1" value="{{ task.stars }}"></td>
-                        <td>
-                            <select class="form-select" name="assigned_to">
-                                {% for choice in ["Atharv", "Ishanvi", "Both"] %}
-                                <option {% if task.assigned_to == choice %}selected{% endif %}>{{ choice }}</option>
-                                {% endfor %}
-                            </select>
-                        </td>
+                        <td><span class="text-muted">{{ task.kid.name }}</span></td>
                         <td><input class="form-check-input" type="checkbox" name="active" {% if task.active %}checked{% endif %}></td>
                         <td class="text-end">
                                 <button class="btn btn-sm btn-primary" title="Save"><i class="fa-solid fa-floppy-disk"></i></button>
@@ -59,6 +63,8 @@
                             </form>
                         </td>
                     </tr>
+                    {% else %}
+                    <tr><td colspan="5" class="text-center text-muted py-4">No tasks yet.</td></tr>
                     {% endfor %}
                     </tbody>
                 </table>

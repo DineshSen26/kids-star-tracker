@@ -18,5 +18,5 @@ services:
         sync: false
       - key: GOOGLE_REDIRECT_URI
         sync: false
-      - key: PARENT_EMAILS
-        sync: false
+      - key: SEED_DEMO_DATA
+        value: "false"

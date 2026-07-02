@@ -19,12 +19,16 @@
             </button>
             <div class="collapse navbar-collapse" id="nav">
                 <ul class="navbar-nav ms-auto align-items-lg-center gap-lg-2">
+                    {% if current_user.is_authenticated %}
                     <li class="nav-item"><a class="nav-link" href="{{ url_for('main.dashboard') }}">Dashboard</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('main.kids') }}">Kids</a></li>
                     <li class="nav-item"><a class="nav-link" href="{{ url_for('main.history') }}">History</a></li>
                     <li class="nav-item"><a class="nav-link" href="{{ url_for('main.rewards') }}">Rewards</a></li>
-                    <li class="nav-item"><a class="nav-link" href="{{ url_for('main.parent') }}">Parent</a></li>
-                    {% if session.get('parent_logged_in') %}
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('main.parent') }}">Tasks</a></li>
                     <li class="nav-item"><a class="nav-link" href="{{ url_for('main.logout') }}">Logout</a></li>
+                    {% else %}
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('main.login') }}">Login</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('main.register') }}">Register</a></li>
                     {% endif %}
                     <li class="nav-item">
                         <button class="btn icon-btn" id="themeToggle" type="button" title="Toggle dark mode">
@@ -42,6 +46,9 @@
                 <p class="date-pill mb-2"><i class="fa-regular fa-calendar"></i> {{ current_date }}</p>
                 <h1>Kids Star Tracker</h1>
                 <p class="hero-copy mb-0">{{ quote }}</p>
+                {% if current_user.is_authenticated %}
+                <p class="mb-0 mt-1 text-muted small">Signed in as {{ current_user.email }}</p>
+                {% endif %}
             </div>
             <div class="sparkle-stack">
                 <span>Star</span><span>Task</span><span>Reward</span>

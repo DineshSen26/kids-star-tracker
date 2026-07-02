@@ -4,11 +4,25 @@
     <div class="col-lg-4">
         <div class="panel">
             <h2>Add Reward</h2>
+            {% if not kids %}
+            <p class="text-muted">Add a kid first before creating rewards.</p>
+            <a class="btn btn-primary rounded-pill" href="{{ url_for('main.kids') }}">Add Kid</a>
+            {% else %}
             <form method="post" class="vstack gap-3">
                 <input class="form-control form-control-lg" name="title" placeholder="Reward title" required>
                 <input class="form-control form-control-lg" name="required_stars" type="number" min="1" value="100" required>
+                <div>
+                    <label class="form-label">For kids:</label>
+                    {% for kid in kids %}
+                    <label class="form-check">
+                        <input class="form-check-input" type="checkbox" name="kid_ids" value="{{ kid.id }}" checked>
+                        <span class="form-check-label">{{ kid.name }}</span>
+                    </label>
+                    {% endfor %}
+                </div>
                 <button class="btn btn-primary btn-lg rounded-pill"><i class="fa-solid fa-gift"></i> Save Reward</button>
             </form>
+            {% endif %}
         </div>
     </div>
     <div class="col-lg-8">
@@ -19,9 +33,10 @@
             </div>
             <div class="table-responsive mt-3">
                 <table class="table align-middle">
-                    <thead><tr><th>Reward</th><th>Stars Needed</th><th>Status</th><th></th></tr></thead>
+                    <thead><tr><th>Reward</th><th>Stars Needed</th><th>Kid</th><th>Status</th><th></th></tr></thead>
                     <tbody id="rewardTable">
                     {% for reward in rewards %}
+                    {% set kid_stats = stats_by_kid.get(reward.kid_id) %}
                     <tr>
                         <td>
                             <form method="post" class="edit-row">
@@ -29,27 +44,30 @@
                                 <input class="form-control" name="title" value="{{ reward.title }}" required>
                         </td>
                         <td><input class="form-control tiny-input" name="required_stars" type="number" min="1" value="{{ reward.required_stars }}"></td>
+                        <td>{{ reward.kid.name }}</td>
                         <td>
-                            {% for item in stats %}
-                            <div class="reward-status">
-                                <span>{{ item.child.name }}</span>
-                                {% if item.total >= reward.required_stars %}
-                                    <strong class="unlocked"><i class="fa-solid fa-unlock"></i> Unlocked</strong>
-                                {% else %}
-                                    <strong><i class="fa-solid fa-lock"></i> Locked</strong>
-                                {% endif %}
-                            </div>
-                            {% endfor %}
+                            {% if kid_stats and kid_stats.total >= reward.required_stars %}
+                                <strong class="unlocked"><i class="fa-solid fa-unlock"></i> Unlocked ({{ kid_stats.total }} stars)</strong>
+                            {% else %}
+                                <strong><i class="fa-solid fa-lock"></i> Locked ({{ kid_stats.total if kid_stats else 0 }} stars)</strong>
+                            {% endif %}
                         </td>
                         <td class="text-end">
                                 <button class="btn btn-sm btn-primary" title="Save"><i class="fa-solid fa-floppy-disk"></i></button>
                             </form>
+                            {% if kid_stats and kid_stats.total >= reward.required_stars %}
+                            <form method="post" action="{{ url_for('main.redeem_reward', reward_id=reward.id) }}" class="d-inline">
+                                <button class="btn btn-sm btn-success" title="Redeem"><i class="fa-solid fa-gift"></i></button>
+                            </form>
+                            {% endif %}
                             <form method="post" action="{{ url_for('main.delete_reward', reward_id=reward.id) }}" class="d-inline">
                                 <button class="btn btn-sm btn-outline-danger" title="Delete"><i class="fa-solid fa-trash"></i></button>
                             </form>
                             <button class="btn btn-sm btn-outline-primary mt-1" onclick="window.print()" title="Print certificate"><i class="fa-solid fa-print"></i></button>
                         </td>
                     </tr>
+                    {% else %}
+                    <tr><td colspan="5" class="text-center text-muted py-4">No rewards yet.</td></tr>
                     {% endfor %}
                     </tbody>
                 </table>

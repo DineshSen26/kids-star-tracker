@@ -1,0 +1,63 @@
+{% extends "layout.html" %}
+{% block content %}
+<div class="row g-4">
+    <div class="col-lg-4">
+        <div class="panel">
+            <h2>Add Kid</h2>
+            {% if kids|length >= max_kids %}
+            <p class="text-warning">You have reached the maximum of {{ max_kids }} kids.</p>
+            {% else %}
+            <form method="post" class="vstack gap-3">
+                <input class="form-control form-control-lg" name="name" placeholder="Name" required>
+                <input class="form-control form-control-lg" name="age" type="number" min="1" max="18" placeholder="Age (optional)">
+                <select class="form-select form-select-lg" name="avatar">
+                    {% for icon in avatar_choices %}
+                    <option value="{{ icon }}">{{ icon.split(' ')[-1]|replace('fa-', '')|title }}</option>
+                    {% endfor %}
+                </select>
+                <button class="btn btn-primary btn-lg rounded-pill"><i class="fa-solid fa-plus"></i> Add Kid</button>
+            </form>
+            {% endif %}
+            <p class="text-muted small mt-3 mb-0">{{ kids|length }} / {{ max_kids }} kids</p>
+        </div>
+    </div>
+    <div class="col-lg-8">
+        <div class="panel">
+            <h2>Your Kids</h2>
+            <div class="row g-3 mt-1">
+                {% for kid in kids %}
+                <div class="col-md-6">
+                    <div class="mini-report h-100">
+                        <div class="d-flex align-items-center gap-3 mb-3">
+                            <div class="avatar"><i class="{{ kid.avatar }}"></i></div>
+                            <div>
+                                <h3 class="mb-0">{{ kid.name }}</h3>
+                                {% if kid.age %}<p class="mb-0 text-muted small">Age {{ kid.age }}</p>{% endif %}
+                            </div>
+                        </div>
+                        <p class="mb-2">
+                            {% if kid.child_login_enabled %}
+                            <span class="fun-badge"><i class="fa-solid fa-lock"></i> PIN login on</span>
+                            {% else %}
+                            <span class="text-muted small">Open access (no PIN)</span>
+                            {% endif %}
+                        </p>
+                        <div class="d-flex flex-wrap gap-2">
+                            <a class="btn btn-sm btn-primary rounded-pill" href="{{ url_for('main.child_page', kid_id=kid.id) }}">Tasks</a>
+                            <a class="btn btn-sm btn-outline-primary rounded-pill" href="{{ url_for('main.edit_kid', kid_id=kid.id) }}">Settings</a>
+                            <form method="post" action="{{ url_for('main.delete_kid', kid_id=kid.id) }}" class="d-inline" onsubmit="return confirm('Remove {{ kid.name }} and all their data?');">
+                                <button class="btn btn-sm btn-outline-danger rounded-pill">Delete</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                {% else %}
+                <div class="col-12">
+                    <p class="text-muted">No kids yet. Add your first kid to get started.</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

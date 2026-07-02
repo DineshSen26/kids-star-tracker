@@ -1,14 +1,18 @@
 # Kids Star Tracker
 
-A colorful Flask application for tracking stars, chores, rewards, badges, history, and streaks for Atharv and Ishanvi.
+A colorful Flask application for families to track stars, chores, rewards, badges, history, and streaks for up to 5 kids per account.
 
 ## Features
 
-- Dashboard with two child cards, progress bars, charts, recent tasks, leaderboard, and statistics.
-- Parent login, task creation, editing, deletion, assignment, weekly reset, and monthly reset.
+- Multi-user accounts with email/password registration and Google OAuth.
+- Up to 5 kids per parent account with avatars, ages, and optional PIN login.
+- Tasks duplicated per kid (no shared "Both" rows).
+- Transaction-based star ledger for balances, redemptions, and undo.
+- Dashboard with progress bars, charts, recent tasks, leaderboard, and statistics.
+- Parent task and reward management with per-kid assignment.
 - Child task pages with large complete buttons, confetti, sound, and flying star animation.
-- Rewards with locked/unlocked status and printable certificates.
-- History filters for today, week, and month, plus CSV export.
+- Rewards with locked/unlocked status, redeem flow, and printable certificates.
+- History filters for today, week, and month, plus CSV export of the star ledger.
 - Dark mode, responsive Bootstrap 5 layout, Font Awesome icons, and Chart.js charts.
 
 ## Installation
@@ -23,38 +27,50 @@ python app.py
 
 Open http://127.0.0.1:5000 in your browser.
 
-The app also listens on your internal network. On another device connected to the same Wi-Fi, open:
+**Important:** If upgrading from the old single-user version, delete `database.db` so the new schema can be created.
+
+## Demo Account
+
+When `SEED_DEMO_DATA=true` (default in local dev), an empty database is seeded with:
 
 ```text
-http://YOUR-COMPUTER-IP:5000
+Email: demo@example.com
+Password: demo123
+Kids: Atharv and Ishanvi with sample tasks, rewards, and star history
 ```
 
-## Parent Login
+Set `SEED_DEMO_DATA=false` in production so real users start with a clean database.
 
-Local development uses the default password:
+## Authentication
 
-```text
-parent123
-```
+### Email and password
 
-For production, use Google login by setting these environment variables:
+Register at `/register` or log in at `/login`.
+
+### Google OAuth (production)
+
+Set these environment variables:
 
 ```text
 SECRET_KEY=replace-with-a-long-random-secret
 GOOGLE_CLIENT_ID=your-google-oauth-client-id
 GOOGLE_CLIENT_SECRET=your-google-oauth-client-secret
 GOOGLE_REDIRECT_URI=https://your-app-hostname/auth/google/callback
-PARENT_EMAILS=parent@gmail.com
 PREFERRED_URL_SCHEME=https
+SEED_DEMO_DATA=false
 ```
 
-Only Gmail addresses listed in `PARENT_EMAILS` can access parent pages. Children still do not need login.
+Google sign-in creates or links a user account by email.
+
+### Child PIN login (optional)
+
+Parents can enable PIN login per kid from **Kids → Settings**. When enabled, the child task page requires a 4–6 digit PIN. Parents logged in always bypass the PIN.
 
 ## Free Hosting
 
-Recommended simple path: deploy on Render's free web service plan if it is available in your account.
+Recommended: deploy on Render's free web service plan.
 
-1. Push this `kids-star-tracker` folder to GitHub.
+1. Push this folder to GitHub.
 2. Create a new Render Web Service from that repository.
 3. Use:
    - Build command: `pip install -r requirements.txt`
@@ -66,43 +82,28 @@ Recommended simple path: deploy on Render's free web service plan if it is avail
 GOOGLE_REDIRECT_URI=https://your-render-url.onrender.com/auth/google/callback
 ```
 
-In Google Cloud Console, create an OAuth client:
+In Google Cloud Console, create an OAuth client with that redirect URI.
 
-1. APIs & Services -> OAuth consent screen.
-2. APIs & Services -> Credentials -> Create OAuth client ID.
-3. Application type: Web application.
-4. Authorized redirect URI:
-
-```text
-https://your-render-url.onrender.com/auth/google/callback
-```
-
-Copy the Google client ID and secret into your hosting environment variables.
-
-Alternative free Flask hosting: PythonAnywhere. Use `wsgi.py` as the WSGI entry point and configure the same Google redirect URI with your PythonAnywhere domain.
+Alternative: PythonAnywhere using `wsgi.py` as the WSGI entry point.
 
 ## Database
 
 Local development uses SQLite (`database.db`), created automatically on first run.
 
-Production must use PostgreSQL (Render Postgres, Neon, or similar). Render's web service filesystem is ephemeral, so SQLite data is lost whenever the app restarts, redeploys, or wakes from sleep.
+Production must use PostgreSQL (Render Postgres, Neon, or similar). Render's web service filesystem is ephemeral, so SQLite data is lost on restart.
 
 ### Neon PostgreSQL setup
 
 1. Create a database at [neon.tech](https://neon.tech) and copy the connection string.
-2. In Render, open your web service -> **Environment**.
-3. Remove any `DATABASE_URL` linked with **Add from database** (that keeps pointing at Render Postgres).
-4. Add `DATABASE_URL` manually with your Neon connection string, for example:
+2. In Render, open your web service → **Environment**.
+3. Add `DATABASE_URL` with your Neon connection string, for example:
 
 ```text
 postgresql://user:password@host/dbname?sslmode=require
 ```
 
+4. Set `SEED_DEMO_DATA=false` for production.
 5. Save and redeploy.
-
-If `render.yaml` uses `fromDatabase` for `DATABASE_URL`, each deploy can overwrite your Neon URL with Render's database again. Use a manual `DATABASE_URL` instead.
-
-Sample data for Atharv, Ishanvi, tasks, rewards, and completions is generated automatically only when the database is empty.
 
 ## Screenshots
 
@@ -116,8 +117,7 @@ Add screenshots here after running the app:
 
 ## Future Improvements
 
-- Add parent password setup screen.
-- Add reward redemption history.
-- Add per-child avatars uploaded by parents.
-- Add calendar view.
-- Add richer badge rules.
+- Forgot-password email flow.
+- Parent invitations to co-manage a family account.
+- Per-child avatar uploads.
+- Calendar view and richer badge rules.

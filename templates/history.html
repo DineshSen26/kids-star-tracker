@@ -1,10 +1,10 @@
 {% extends "layout.html" %}
 {% block content %}
-<div class="panel">
+<div class="panel mb-4">
     <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
         <div>
-            <h2>History</h2>
-            <p class="mb-0">Total stars in view: <strong>{{ total }}</strong></p>
+            <h2>Task History</h2>
+            <p class="mb-0">Completed tasks in view: <strong>{{ total }}</strong> stars</p>
         </div>
         <div class="btn-group">
             <a class="btn btn-outline-primary {% if selected_period == 'today' %}active{% endif %}" href="{{ url_for('main.history', period='today') }}">Today</a>
@@ -15,12 +15,12 @@
     </div>
     <div class="table-responsive mt-4">
         <table class="table align-middle">
-            <thead><tr><th>Date</th><th>Child</th><th>Task</th><th>Stars</th><th class="text-end">Status</th></tr></thead>
+            <thead><tr><th>Date</th><th>Kid</th><th>Task</th><th>Stars</th><th class="text-end">Status</th></tr></thead>
             <tbody>
             {% for item in completions %}
                 <tr>
                     <td>{{ item.date }}</td>
-                    <td>{{ item.child.name }}</td>
+                    <td>{{ item.kid.name }}</td>
                     <td>{{ item.task.title }}</td>
                     <td>{{ item.task.stars }}</td>
                     <td class="text-end">
@@ -33,6 +33,31 @@
                 </tr>
             {% else %}
                 <tr><td colspan="5" class="text-center text-muted py-4">No completed tasks in this view yet.</td></tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="panel">
+    <h2>Star Ledger</h2>
+    <p class="text-muted">All star transactions including rewards and adjustments.</p>
+    <div class="table-responsive mt-3">
+        <table class="table align-middle">
+            <thead><tr><th>Date</th><th>Kid</th><th>Type</th><th>Description</th><th>Stars</th></tr></thead>
+            <tbody>
+            {% for txn in transactions %}
+                <tr>
+                    <td>{{ txn.created_at.strftime('%Y-%m-%d') }}</td>
+                    <td>{{ txn.kid.name }}</td>
+                    <td>{{ txn.reference_type }}</td>
+                    <td>{{ txn.reason }}</td>
+                    <td class="{% if txn.stars > 0 %}text-success{% else %}text-danger{% endif %}">
+                        {% if txn.stars > 0 %}+{% endif %}{{ txn.stars }}
+                    </td>
+                </tr>
+            {% else %}
+                <tr><td colspan="5" class="text-center text-muted py-4">No transactions in this view yet.</td></tr>
             {% endfor %}
             </tbody>
         </table>

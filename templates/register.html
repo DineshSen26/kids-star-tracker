@@ -2,12 +2,13 @@
 {% block content %}
 <div class="login-shell">
     <div class="panel login-panel">
-        <h2>Parent Login</h2>
-        <p class="text-muted">Sign in with email or Google.</p>
+        <h2>Create Account</h2>
+        <p class="text-muted">Register to manage your family's stars.</p>
         <form method="post" class="vstack gap-3 mb-3">
             <input class="form-control form-control-lg" type="email" name="email" placeholder="Email" required autofocus>
-            <input class="form-control form-control-lg" type="password" name="password" placeholder="Password" required>
-            <button class="btn btn-primary btn-lg rounded-pill"><i class="fa-solid fa-lock"></i> Login</button>
+            <input class="form-control form-control-lg" type="password" name="password" placeholder="Password (min 6 chars)" required minlength="6">
+            <input class="form-control form-control-lg" type="password" name="confirm_password" placeholder="Confirm password" required minlength="6">
+            <button class="btn btn-primary btn-lg rounded-pill"><i class="fa-solid fa-user-plus"></i> Register</button>
         </form>
         {% if google_login_enabled %}
         <p class="text-center text-muted small">or</p>
@@ -16,7 +17,7 @@
         </a>
         {% endif %}
         <p class="text-center mt-3 mb-0">
-            <a href="{{ url_for('main.register') }}">Create an account</a>
+            Already have an account? <a href="{{ url_for('main.login') }}">Login</a>
         </p>
     </div>
 </div>
