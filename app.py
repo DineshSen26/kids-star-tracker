@@ -6,6 +6,7 @@ from datetime import datetime, timedelta
 from flask import Flask
 from flask_login import LoginManager
 from flask_migrate import Migrate
+from sqlalchemy import inspect, text
 from werkzeug.middleware.proxy_fix import ProxyFix
 from werkzeug.security import generate_password_hash
 
@@ -32,6 +33,36 @@ def database_uri(app_root_path: str) -> str:
 @login_manager.user_loader
 def load_user(user_id: str) -> User | None:
     return db.session.get(User, int(user_id))
+
+
+LEGACY_TABLES = ("completion", "child", "task", "reward")
+
+
+def drop_legacy_schema_if_needed() -> None:
+    """Remove pre-multi-user tables that block PostgreSQL schema creation."""
+    inspector = inspect(db.engine)
+    tables = set(inspector.get_table_names())
+    legacy = set(LEGACY_TABLES) & tables
+    if not legacy:
+        return
+
+    new_schema_ready = "users" in tables and "completions" in tables
+    if new_schema_ready:
+        return
+
+    for table in LEGACY_TABLES:
+        if table in tables:
+            db.session.execute(text(f'DROP TABLE IF EXISTS "{table}" CASCADE'))
+
+    if "completions" not in tables:
+        db.session.execute(text("DROP INDEX IF EXISTS one_completion_per_day"))
+
+    db.session.commit()
+
+
+def prepare_database() -> None:
+    drop_legacy_schema_if_needed()
+    db.create_all()
 
 
 def create_app() -> Flask:
@@ -67,7 +98,7 @@ def create_app() -> Flask:
     app.register_blueprint(main)
 
     with app.app_context():
-        db.create_all()
+        prepare_database()
         if app.config["SEED_DEMO_DATA"]:
             seed_data(app)
 

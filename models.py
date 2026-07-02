@@ -94,7 +94,9 @@ class Completion(db.Model):
     kid = db.relationship("Kid", back_populates="completions")
 
     __table_args__ = (
-        db.UniqueConstraint("task_id", "kid_id", "date", name="one_completion_per_day"),
+        db.UniqueConstraint(
+            "task_id", "kid_id", "date", name="uq_completions_task_kid_date"
+        ),
     )
 
 
