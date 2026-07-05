@@ -42,6 +42,8 @@ TASK_ICON_CHOICES = [
     "fa-solid fa-school",         # School
     "fa-solid fa-backpack",       # School bag
     "fa-solid fa-heart-pulse",    # Health
+    "fa-solid fa-hands-praying", 
+    "fa-solid fa-place-of-worship",
 ]
 
 TASK_ICON_KEYWORDS: list[tuple[list[str], str]] = [
@@ -110,6 +112,12 @@ TASK_ICON_KEYWORDS: list[tuple[list[str], str]] = [
     (["health", "doctor"], "fa-solid fa-heart-pulse"),
 
     (["time", "clock", "early"], "fa-solid fa-clock"),
+    
+    (["pooja", "puja", "prayer", "temple", "aarti", "god", "worship", "meditation"], 
+     "fa-solid fa-hands-praying"),
+
+    (["temple visit", "mandir"], 
+     "fa-solid fa-place-of-worship"),
 ]
 
 
