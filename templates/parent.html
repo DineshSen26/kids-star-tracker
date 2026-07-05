@@ -8,8 +8,22 @@
             <p class="text-muted">Add a kid first before creating tasks.</p>
             <a class="btn btn-primary rounded-pill" href="{{ url_for('main.kids') }}">Add Kid</a>
             {% else %}
-            <form method="post" class="vstack gap-3">
-                <input class="form-control form-control-lg" name="title" placeholder="Task name" required>
+            <form method="post" class="vstack gap-3" id="addTaskForm">
+                <div>
+                    <label class="form-label">Task name</label>
+                    <input class="form-control form-control-lg" name="title" id="taskTitleInput" placeholder="e.g. Brush Teeth" required>
+                </div>
+                <div>
+                    <label class="form-label">Icon for kids</label>
+                    <div class="task-icon-picker" data-icon-suggest-url="{{ url_for('main.task_icon_suggest') }}">
+                        <div class="task-icon-preview" id="taskIconPreview" aria-hidden="true">
+                            <i class="fa-solid fa-star"></i>
+                        </div>
+                        <input type="hidden" name="icon" id="taskIconInput" value="fa-solid fa-star">
+                        <p class="text-muted small mb-2">We suggest an icon from the task name. Tap another if you prefer.</p>
+                        <div class="icon-suggestions" id="taskIconSuggestions"></div>
+                    </div>
+                </div>
                 <input class="form-control form-control-lg" name="stars" type="number" min="1" value="2" required>
                 <div>
                     <label class="form-label">Assign to:</label>
@@ -43,14 +57,19 @@
             </div>
             <div class="table-responsive mt-3">
                 <table class="table align-middle">
-                    <thead><tr><th>Task</th><th>Stars</th><th>Kid</th><th>Status</th><th></th></tr></thead>
+                    <thead><tr><th>Icon</th><th>Task</th><th>Stars</th><th>Kid</th><th>Status</th><th></th></tr></thead>
                     <tbody id="taskTable">
                     {% for task in tasks %}
                     <tr>
                         <td>
-                            <form method="post" class="edit-row">
+                            <div class="edit-task-icon"><i class="{{ task.icon | task_icon(task.title) }}"></i></div>
+                        </td>
+                        <td>
+                            <form method="post" class="edit-row task-edit-form">
                                 <input type="hidden" name="task_id" value="{{ task.id }}">
-                                <input class="form-control" name="title" value="{{ task.title }}" required>
+                                <input type="hidden" name="icon" value="{{ task.icon | task_icon(task.title) }}" class="edit-task-icon-input">
+                                <input class="form-control edit-task-title" name="title" value="{{ task.title }}" required>
+                                <div class="icon-suggestions edit-icon-suggestions mt-2"></div>
                         </td>
                         <td><input class="form-control tiny-input" name="stars" type="number" min="1" value="{{ task.stars }}"></td>
                         <td><span class="text-muted">{{ task.kid.name }}</span></td>
@@ -64,7 +83,7 @@
                         </td>
                     </tr>
                     {% else %}
-                    <tr><td colspan="5" class="text-center text-muted py-4">No tasks yet.</td></tr>
+                    <tr><td colspan="6" class="text-center text-muted py-4">No tasks yet.</td></tr>
                     {% endfor %}
                     </tbody>
                 </table>

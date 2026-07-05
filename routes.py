@@ -36,6 +36,12 @@ from models import (
     User,
     db,
 )
+from task_icons import (
+    DEFAULT_TASK_ICON,
+    resolve_task_icon,
+    suggest_task_icon,
+    suggest_task_icons,
+)
 
 main = Blueprint("main", __name__)
 
@@ -286,6 +292,11 @@ def layout_data():
     }
 
 
+@main.app_template_filter("task_icon")
+def task_icon_filter(stored: str | None, title: str = "") -> str:
+    return resolve_task_icon(stored, title)
+
+
 @main.route("/")
 @login_required
 def dashboard():
@@ -481,6 +492,14 @@ def delete_kid(kid_id: int):
     return redirect(url_for("main.kids"))
 
 
+@main.route("/api/task-icon-suggest")
+@login_required
+def task_icon_suggest():
+    query = request.args.get("q", "").strip()
+    icons = suggest_task_icons(query) if query else [DEFAULT_TASK_ICON]
+    return jsonify({"icons": icons, "primary": icons[0]})
+
+
 @main.route("/parent", methods=["GET", "POST"])
 @login_required
 def parent():
@@ -491,10 +510,12 @@ def parent():
         stars = max(request.form.get("stars", type=int) or 1, 1)
         active = request.form.get("active") == "on"
         selected_kids = request.form.getlist("kid_ids", type=int)
+        icon = request.form.get("icon", "").strip() or suggest_task_icon(title)
 
         if task_id:
             task = Task.query.filter_by(id=task_id, user_id=current_user.id).first_or_404()
             task.title = title
+            task.icon = icon
             task.stars = stars
             task.active = active
             db.session.commit()
@@ -512,6 +533,7 @@ def parent():
                     user_id=current_user.id,
                     kid_id=kid_id,
                     title=title,
+                    icon=icon,
                     stars=stars,
                     active=active,
                 )

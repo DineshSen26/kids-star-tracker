@@ -69,6 +69,7 @@ class Task(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
     kid_id = db.Column(db.Integer, db.ForeignKey("kids.id"), nullable=False)
     title = db.Column(db.String(140), nullable=False)
+    icon = db.Column(db.String(120), nullable=False, default="fa-solid fa-star")
     stars = db.Column(db.Integer, nullable=False, default=1)
     active = db.Column(db.Boolean, nullable=False, default=True)
     created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)

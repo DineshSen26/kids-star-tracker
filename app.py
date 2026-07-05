@@ -12,6 +12,12 @@ from werkzeug.security import generate_password_hash
 
 from models import Completion, Kid, Reward, Task, Transaction, User, db
 from routes import main, today
+from task_icons import (
+    DEFAULT_TASK_ICON,
+    is_stored_picture,
+    is_task_icon,
+    suggest_task_icon,
+)
 
 
 login_manager = LoginManager()
@@ -60,9 +66,28 @@ def drop_legacy_schema_if_needed() -> None:
     db.session.commit()
 
 
+def migrate_task_icons_if_needed() -> None:
+    inspector = inspect(db.engine)
+    if "tasks" not in inspector.get_table_names():
+        return
+
+    columns = {column["name"] for column in inspector.get_columns("tasks")}
+    if "icon" not in columns:
+        db.session.execute(
+            text("ALTER TABLE tasks ADD COLUMN icon VARCHAR(120) DEFAULT 'fa-solid fa-star'")
+        )
+        db.session.commit()
+
+    for task in Task.query.all():
+        if is_stored_picture(task.icon) or not task.icon or not is_task_icon(task.icon):
+            task.icon = suggest_task_icon(task.title)
+    db.session.commit()
+
+
 def prepare_database() -> None:
     drop_legacy_schema_if_needed()
     db.create_all()
+    migrate_task_icons_if_needed()
 
 
 def create_app() -> Flask:
@@ -156,6 +181,7 @@ def seed_data(app: Flask) -> None:
                     user_id=user.id,
                     kid_id=kid_id,
                     title=title,
+                    icon=suggest_task_icon(title),
                     stars=stars,
                 )
                 db.session.add(task)

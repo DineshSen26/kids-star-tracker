@@ -134,6 +134,117 @@ function speakCelebration(childName) {
     window.speechSynthesis.addEventListener("voiceschanged", speak, { once: true });
 }
 
+async function fetchTaskIconSuggestions(query, suggestUrl) {
+    if (!suggestUrl) {
+        return ["fa-solid fa-star"];
+    }
+
+    const response = await fetch(`${suggestUrl}?q=${encodeURIComponent(query)}`);
+    if (!response.ok) {
+        return ["fa-solid fa-star"];
+    }
+
+    const payload = await response.json();
+    return payload.icons?.length ? payload.icons : ["fa-solid fa-star"];
+}
+
+function renderIconSuggestions(container, icons, selectedIcon, onSelect) {
+    if (!container) {
+        return;
+    }
+
+    container.innerHTML = "";
+    icons.forEach((iconClass) => {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "icon-suggestion-btn";
+        if (iconClass === selectedIcon) {
+            button.classList.add("selected");
+        }
+        button.innerHTML = `<i class="${iconClass}"></i>`;
+        button.title = "Use this icon";
+        button.addEventListener("click", () => onSelect(iconClass, container));
+        container.appendChild(button);
+    });
+}
+
+function setSelectedIcon(iconClass, hiddenInput, previewElement, container) {
+    if (hiddenInput) {
+        hiddenInput.value = iconClass;
+    }
+
+    if (previewElement) {
+        previewElement.innerHTML = `<i class="${iconClass}"></i>`;
+    }
+
+    container?.querySelectorAll(".icon-suggestion-btn").forEach((button) => {
+        button.classList.toggle("selected", button.querySelector("i")?.className === iconClass);
+    });
+}
+
+function setupTaskIconPicker({
+    titleInput,
+    hiddenInput,
+    previewElement,
+    suggestionsContainer,
+    suggestUrl,
+    rowElement,
+}) {
+    let debounceTimer;
+
+    const updatePreviewInRow = (iconClass) => {
+        rowElement?.querySelector(".edit-task-icon i")?.setAttribute("class", iconClass);
+    };
+
+    const applyIcons = (icons, selectedIcon) => {
+        renderIconSuggestions(suggestionsContainer, icons, selectedIcon, (iconClass, container) => {
+            setSelectedIcon(iconClass, hiddenInput, previewElement, container);
+            updatePreviewInRow(iconClass);
+        });
+    };
+
+    const refreshSuggestions = async () => {
+        const query = titleInput.value.trim();
+        const icons = await fetchTaskIconSuggestions(query, suggestUrl);
+        const selectedIcon = hiddenInput?.value || icons[0];
+        const nextIcon = icons.includes(selectedIcon) ? selectedIcon : icons[0];
+        setSelectedIcon(nextIcon, hiddenInput, previewElement, suggestionsContainer);
+        updatePreviewInRow(nextIcon);
+        applyIcons(icons, nextIcon);
+    };
+
+    titleInput.addEventListener("input", () => {
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(refreshSuggestions, 250);
+    });
+
+    refreshSuggestions();
+}
+
+function initTaskIconPickers() {
+    const picker = document.querySelector(".task-icon-picker");
+    if (picker) {
+        setupTaskIconPicker({
+            titleInput: document.getElementById("taskTitleInput"),
+            hiddenInput: document.getElementById("taskIconInput"),
+            previewElement: document.getElementById("taskIconPreview"),
+            suggestionsContainer: document.getElementById("taskIconSuggestions"),
+            suggestUrl: picker.dataset.iconSuggestUrl,
+        });
+    }
+
+    document.querySelectorAll(".task-edit-form").forEach((form) => {
+        setupTaskIconPicker({
+            titleInput: form.querySelector(".edit-task-title"),
+            hiddenInput: form.querySelector(".edit-task-icon-input"),
+            previewElement: null,
+            suggestionsContainer: form.querySelector(".edit-icon-suggestions"),
+            suggestUrl: document.querySelector(".task-icon-picker")?.dataset.iconSuggestUrl,
+            rowElement: form.closest("tr"),
+        });
+    });
+}
+
 document.addEventListener("DOMContentLoaded", () => {
     const savedTheme = localStorage.getItem("kids-star-theme") || "light";
     document.documentElement.dataset.theme = savedTheme;
@@ -180,4 +291,6 @@ document.addEventListener("DOMContentLoaded", () => {
             row.style.display = row.textContent.toLowerCase().includes(query) ? "" : "none";
         });
     });
+
+    initTaskIconPickers();
 });
