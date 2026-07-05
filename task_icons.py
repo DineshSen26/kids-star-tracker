@@ -28,31 +28,88 @@ TASK_ICON_CHOICES = [
     "fa-solid fa-plate-wheat",
     "fa-solid fa-apple-whole",
     "fa-solid fa-person-running",
+    # New icons
+    "fa-solid fa-pills",          # Medicine
+    "fa-solid fa-heart",          # Kindness
+    "fa-solid fa-face-smile",     # Good behaviour
+    "fa-solid fa-glass-water",    # Drink water
+    "fa-solid fa-carrot",         # Vegetables
+    "fa-solid fa-cookie-bite",    # Snack/Treat
+    "fa-solid fa-clock",          # Be on time
+    "fa-solid fa-hand-sparkles",  # Wash hands
+    "fa-solid fa-soap",           # Soap
+    "fa-solid fa-moon",           # Sleep
+    "fa-solid fa-school",         # School
+    "fa-solid fa-backpack",       # School bag
+    "fa-solid fa-heart-pulse",    # Health
 ]
 
 TASK_ICON_KEYWORDS: list[tuple[list[str], str]] = [
-    (["homework", "school", "study", "math", "spell", "write"], "fa-solid fa-book"),
+   (["homework", "school", "study", "math", "spell", "write"], "fa-solid fa-book"),
     (["reading", "read", "story", "library"], "fa-solid fa-book-open-reader"),
+    (["practice", "worksheet", "writing"], "fa-solid fa-pencil"),
+
     (["brush", "teeth", "tooth", "dental"], "fa-solid fa-tooth"),
-    (["clean", "tidy", "toys", "room", "organize", "vacuum"], "fa-solid fa-broom"),
-    (["draw", "drawing", "art", "paint", "color"], "fa-solid fa-palette"),
-    (["help", "mom", "dad", "parent", "family"], "fa-solid fa-hands-helping"),
+
+    (["medicine", "medication", "pill", "vitamin", "tablet", "syrup"], "fa-solid fa-pills"),
+
+    (["wash hands", "hand wash", "sanitize"], "fa-solid fa-hand-sparkles"),
+
+    (["soap"], "fa-solid fa-soap"),
+
+    (["bath", "shower"], "fa-solid fa-shower"),
+
+    (["clean", "tidy", "toys", "room", "organize"], "fa-solid fa-broom"),
+
+    (["draw", "drawing", "paint", "art", "colour", "color"], "fa-solid fa-palette"),
+
     (["eat", "breakfast", "lunch", "dinner", "food"], "fa-solid fa-utensils"),
+
+    (["fruit", "apple", "banana", "snack"], "fa-solid fa-apple-whole"),
+
+    (["vegetable", "veggie", "carrot", "broccoli"], "fa-solid fa-carrot"),
+
+    (["drink", "water", "hydrate"], "fa-solid fa-glass-water"),
+
     (["bed", "sleep", "nap"], "fa-solid fa-bed"),
-    (["dress", "clothes", "shirt", "outfit"], "fa-solid fa-shirt"),
-    (["bath", "shower", "wash"], "fa-solid fa-shower"),
+
+    (["night", "moon", "bedtime"], "fa-solid fa-moon"),
+
+    (["dress", "clothes", "shirt", "uniform"], "fa-solid fa-shirt"),
+
     (["exercise", "sport", "run", "workout"], "fa-solid fa-person-running"),
-    (["music", "piano", "sing", "song"], "fa-solid fa-music"),
-    (["game", "play", "tablet"], "fa-solid fa-gamepad"),
-    (["puzzle", "lego", "blocks"], "fa-solid fa-puzzle-piece"),
-    (["dog", "walk dog", "pet"], "fa-solid fa-dog"),
-    (["cat", "kitty"], "fa-solid fa-cat"),
-    (["garden", "plant", "water", "flower"], "fa-solid fa-seedling"),
-    (["trash", "garbage", "recycle"], "fa-solid fa-trash"),
-    (["dishes", "sink", "dishwasher"], "fa-solid fa-sink"),
-    (["fruit", "apple", "snack", "healthy"], "fa-solid fa-apple-whole"),
+
     (["bike", "bicycle", "cycle"], "fa-solid fa-bicycle"),
-    (["practice", "pencil", "homework"], "fa-solid fa-pencil"),
+
+    (["music", "sing", "song", "piano"], "fa-solid fa-music"),
+
+    (["game", "play", "tablet", "video game"], "fa-solid fa-gamepad"),
+
+    (["lego", "blocks", "puzzle"], "fa-solid fa-puzzle-piece"),
+
+    (["dog", "walk dog", "pet"], "fa-solid fa-dog"),
+
+    (["cat", "kitty"], "fa-solid fa-cat"),
+
+    (["garden", "plant", "flower", "water plant"], "fa-solid fa-seedling"),
+
+    (["trash", "garbage", "recycle"], "fa-solid fa-trash"),
+
+    (["dishes", "dishwasher", "sink"], "fa-solid fa-sink"),
+
+    (["help", "mom", "dad", "family", "chores"], "fa-solid fa-hands-helping"),
+
+    (["kind", "sharing", "polite", "good behaviour", "respect"], "fa-solid fa-heart"),
+
+    (["happy", "smile", "good job"], "fa-solid fa-face-smile"),
+
+    (["school bus", "school"], "fa-solid fa-school"),
+
+    (["bag", "backpack"], "fa-solid fa-backpack"),
+
+    (["health", "doctor"], "fa-solid fa-heart-pulse"),
+
+    (["time", "clock", "early"], "fa-solid fa-clock"),
 ]
 
 
