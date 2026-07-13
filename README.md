@@ -55,7 +55,8 @@ Set these environment variables:
 SECRET_KEY=replace-with-a-long-random-secret
 GOOGLE_CLIENT_ID=your-google-oauth-client-id
 GOOGLE_CLIENT_SECRET=your-google-oauth-client-secret
-GOOGLE_REDIRECT_URI=https://your-app-hostname/auth/google/callback
+APP_BASE_URL=https://kiddostars.uk
+GOOGLE_REDIRECT_URI=https://kiddostars.uk/auth/google/callback
 PREFERRED_URL_SCHEME=https
 SEED_DEMO_DATA=false
 ```
@@ -76,13 +77,17 @@ Recommended: deploy on Render's free web service plan.
    - Build command: `pip install -r requirements.txt`
    - Start command: `gunicorn wsgi:app`
 4. Add the environment variables from `.env.example`.
-5. After Render gives you a URL, set:
+5. Set your production URL (custom domain example):
 
 ```text
-GOOGLE_REDIRECT_URI=https://your-render-url.onrender.com/auth/google/callback
+APP_BASE_URL=https://kiddostars.uk
+GOOGLE_REDIRECT_URI=https://kiddostars.uk/auth/google/callback
 ```
 
-In Google Cloud Console, create an OAuth client with that redirect URI.
+In Google Cloud Console, create an OAuth client with:
+
+- Authorized JavaScript origins: `https://kiddostars.uk`
+- Authorized redirect URIs: `https://kiddostars.uk/auth/google/callback`
 
 Alternative: PythonAnywhere using `wsgi.py` as the WSGI entry point.
 

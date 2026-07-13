@@ -16,7 +16,9 @@ services:
         sync: false
       - key: GOOGLE_CLIENT_SECRET
         sync: false
+      - key: APP_BASE_URL
+        value: https://kiddostars.uk
       - key: GOOGLE_REDIRECT_URI
-        sync: false
+        value: https://kiddostars.uk/auth/google/callback
       - key: SEED_DEMO_DATA
         value: "false"

@@ -243,9 +243,18 @@ def google_login_enabled() -> bool:
 
 
 def oauth_redirect_uri() -> str:
-    configured = current_app.config["GOOGLE_REDIRECT_URI"]
+    configured = current_app.config.get("GOOGLE_REDIRECT_URI", "").strip()
     if configured:
         return configured
+
+    app_base_url = current_app.config.get("APP_BASE_URL", "").strip().rstrip("/")
+    if app_base_url:
+        return f"{app_base_url}/auth/google/callback"
+
+    if request.host:
+        scheme = current_app.config.get("PREFERRED_URL_SCHEME", "https")
+        return f"{scheme}://{request.host}/auth/google/callback"
+
     return url_for("main.google_callback", _external=True)
 
 
