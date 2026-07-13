@@ -324,6 +324,61 @@ body {
     font-size: 1.05rem;
 }
 
+.info-step {
+    position: relative;
+    padding-top: 28px;
+}
+
+.step-number {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    font-weight: 900;
+    color: #312600;
+    background: var(--sun);
+    margin-bottom: 12px;
+}
+
+.feature-card {
+    height: 100%;
+    padding: 18px;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.52);
+}
+
+[data-theme="dark"] .feature-card {
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.feature-card i {
+    font-size: 1.5rem;
+    color: var(--brand);
+    margin-bottom: 10px;
+}
+
+.feature-card h4 {
+    font-size: 1.05rem;
+    font-weight: 800;
+    margin-bottom: 8px;
+}
+
+.feature-card p {
+    color: var(--muted);
+    margin-bottom: 0;
+    font-size: 0.95rem;
+}
+
+footer a {
+    color: var(--ink);
+    text-decoration: none;
+}
+
+footer a:hover {
+    color: var(--brand);
+}
+
 .btn-primary {
     background: linear-gradient(135deg, var(--brand), var(--sky));
     border: 0;

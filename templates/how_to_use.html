@@ -1,0 +1,144 @@
+{% extends "layout.html" %}
+{% block content %}
+<section class="panel mb-4">
+    <h2 class="mb-2"><i class="fa-solid fa-book-open-reader text-primary"></i> How to Use Kids Star Tracker</h2>
+    <p class="text-muted mb-0">A quick guide for parents and kids. Follow these steps to set up your family and start earning stars.</p>
+</section>
+
+<section class="row g-4">
+    <div class="col-lg-6">
+        <article class="panel info-step h-100">
+            <p class="step-number">1</p>
+            <h3>Create your account</h3>
+            <p>Register with email and password, or sign in with Google. One parent account can manage up to <strong>5 kids</strong>.</p>
+            {% if not current_user.is_authenticated %}
+            <a class="btn btn-sm btn-primary rounded-pill" href="{{ url_for('main.register') }}">Register</a>
+            {% endif %}
+        </article>
+    </div>
+    <div class="col-lg-6">
+        <article class="panel info-step h-100">
+            <p class="step-number">2</p>
+            <h3>Add your kids</h3>
+            <p>Go to <strong>Kids</strong>, add each child's name and age, and pick a fun avatar. You can also turn on optional <strong>PIN login</strong> so a child can open their own task page safely.</p>
+        </article>
+    </div>
+    <div class="col-lg-6">
+        <article class="panel info-step h-100">
+            <p class="step-number">3</p>
+            <h3>Create tasks with icons</h3>
+            <p>Go to <strong>Tasks</strong>, type a task name like "Brush Teeth", and the app <strong>auto-suggests icons</strong>. Kids see a large picture on their task card — perfect for children who do not read yet. Assign tasks to one or more kids.</p>
+        </article>
+    </div>
+    <div class="col-lg-6">
+        <article class="panel info-step h-100">
+            <p class="step-number">4</p>
+            <h3>Kids complete tasks</h3>
+            <p>Open a child's <strong>Tasks</strong> page from the dashboard. They tap <strong>Complete</strong> when done. The app plays a cheerful sound, shows confetti, and awards stars for that day.</p>
+        </article>
+    </div>
+    <div class="col-lg-6">
+        <article class="panel info-step h-100">
+            <p class="step-number">5</p>
+            <h3>Set up rewards</h3>
+            <p>Go to <strong>Rewards</strong> and create prizes like "Movie Night" or "Ice Cream" with a star cost. When a child has enough stars, you can redeem the reward from the rewards page.</p>
+        </article>
+    </div>
+    <div class="col-lg-6">
+        <article class="panel info-step h-100">
+            <p class="step-number">6</p>
+            <h3>Track progress</h3>
+            <p>Use the <strong>Dashboard</strong> for charts, streaks, badges, and a leaderboard. Check <strong>History</strong> to see completed tasks by day, week, or month — and export a CSV if you want a record.</p>
+        </article>
+    </div>
+</section>
+
+<section class="panel mt-4">
+    <h2 class="mb-4"><i class="fa-solid fa-wand-magic-sparkles text-warning"></i> Features</h2>
+    <div class="row g-3">
+        <div class="col-md-6 col-lg-4">
+            <div class="feature-card">
+                <i class="fa-solid fa-icons"></i>
+                <h4>Visual task icons</h4>
+                <p>Tasks show big icons so young kids understand what to do without reading.</p>
+            </div>
+        </div>
+        <div class="col-md-6 col-lg-4">
+            <div class="feature-card">
+                <i class="fa-solid fa-star"></i>
+                <h4>Star rewards</h4>
+                <p>Each task earns stars. Balances are tracked in a clear ledger.</p>
+            </div>
+        </div>
+        <div class="col-md-6 col-lg-4">
+            <div class="feature-card">
+                <i class="fa-solid fa-gift"></i>
+                <h4>Redeemable rewards</h4>
+                <p>Kids save stars and unlock treats or privileges you define.</p>
+            </div>
+        </div>
+        <div class="col-md-6 col-lg-4">
+            <div class="feature-card">
+                <i class="fa-solid fa-chart-line"></i>
+                <h4>Dashboard & charts</h4>
+                <p>See daily, weekly, and monthly progress at a glance.</p>
+            </div>
+        </div>
+        <div class="col-md-6 col-lg-4">
+            <div class="feature-card">
+                <i class="fa-solid fa-fire"></i>
+                <h4>Streaks & badges</h4>
+                <p>Stay motivated with streaks and fun achievement badges.</p>
+            </div>
+        </div>
+        <div class="col-md-6 col-lg-4">
+            <div class="feature-card">
+                <i class="fa-solid fa-lock"></i>
+                <h4>Child PIN login</h4>
+                <p>Optional PIN keeps a child's task page private on shared devices.</p>
+            </div>
+        </div>
+        <div class="col-md-6 col-lg-4">
+            <div class="feature-card">
+                <i class="fa-solid fa-wand-magic-sparkles"></i>
+                <h4>Celebrations</h4>
+                <p>Confetti, sounds, and encouraging voice messages when tasks are done.</p>
+            </div>
+        </div>
+        <div class="col-md-6 col-lg-4">
+            <div class="feature-card">
+                <i class="fa-solid fa-clock-rotate-left"></i>
+                <h4>History & undo</h4>
+                <p>Review completed tasks and undo mistakes if needed.</p>
+            </div>
+        </div>
+        <div class="col-md-6 col-lg-4">
+            <div class="feature-card">
+                <i class="fa-solid fa-moon"></i>
+                <h4>Dark mode</h4>
+                <p>Toggle light or dark theme from the navigation bar.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="panel mt-4">
+    <h3 class="mb-3">Tips for Parents</h3>
+    <ul class="mb-0">
+        <li>Start with 3–5 simple daily tasks so kids are not overwhelmed.</li>
+        <li>Use higher star values for harder tasks and lower values for quick habits.</li>
+        <li>Let kids help choose reward goals — they stay more excited that way.</li>
+        <li>Open the child task page on a tablet and let them tap Complete themselves.</li>
+        <li>Check the dashboard together at the end of the day to celebrate wins.</li>
+    </ul>
+</section>
+
+<div class="text-center mt-4">
+    <a class="btn btn-outline-secondary rounded-pill me-2" href="{{ url_for('main.about') }}">About Us</a>
+    {% if current_user.is_authenticated %}
+    <a class="btn btn-primary rounded-pill" href="{{ url_for('main.dashboard') }}">Back to Dashboard</a>
+    {% else %}
+    <a class="btn btn-primary rounded-pill" href="{{ url_for('main.login') }}">Login</a>
+    {% endif %}
+</div>
+{% endblock %}

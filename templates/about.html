@@ -1,0 +1,61 @@
+{% extends "layout.html" %}
+{% block content %}
+<section class="row g-4">
+    <div class="col-lg-8">
+        <div class="panel">
+            <h2 class="mb-3"><i class="fa-solid fa-heart text-danger"></i> About Kids Star Tracker</h2>
+            <p class="lead">Kids Star Tracker helps families turn everyday tasks into a fun star reward system that kids can understand — even before they can read.</p>
+            <p>We built this app for parents who want a simple, positive way to encourage good habits at home. Whether it is homework, brushing teeth, helping with chores, or being kind, children earn stars for completed tasks and save them up for rewards they care about.</p>
+            <p>Each child gets their own task board with big, colourful icons so they can recognise what to do at a glance. Parents stay in control: you add kids, create tasks, set star values, and manage rewards from one family account.</p>
+        </div>
+
+        <div class="panel mt-4">
+            <h2 class="mb-3"><i class="fa-solid fa-bullseye text-primary"></i> Our Mission</h2>
+            <p>Make daily routines feel like a game — not a struggle. Small wins should be celebrated, progress should be visible, and families should have one cheerful place to track it all.</p>
+            <ul class="mb-0">
+                <li>Keep things simple for busy parents</li>
+                <li>Make tasks visual and easy for young children</li>
+                <li>Celebrate effort with stars, streaks, and badges</li>
+                <li>Help kids learn patience by saving stars for bigger rewards</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="col-lg-4">
+        <div class="panel">
+            <h3 class="mb-3">At a Glance</h3>
+            <div class="vstack gap-3">
+                <div class="mini-report d-flex align-items-center gap-3">
+                    <i class="fa-solid fa-users fa-lg text-primary"></i>
+                    <div>Up to 5 kids per family account</div>
+                </div>
+                <div class="mini-report d-flex align-items-center gap-3">
+                    <i class="fa-solid fa-star fa-lg text-warning"></i>
+                    <div>Star ledger for every task and reward</div>
+                </div>
+                <div class="mini-report d-flex align-items-center gap-3">
+                    <i class="fa-solid fa-icons fa-lg text-success"></i>
+                    <div>Auto-suggested task icons for kids</div>
+                </div>
+                <div class="mini-report d-flex align-items-center gap-3">
+                    <i class="fa-solid fa-mobile-screen fa-lg text-info"></i>
+                    <div>Works on phones, tablets, and computers</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="panel mt-4">
+            <h3 class="mb-3">Get Started</h3>
+            <p class="text-muted">New here? Read the step-by-step guide, then create your free account.</p>
+            <div class="d-flex flex-wrap gap-2">
+                <a class="btn btn-outline-primary rounded-pill" href="{{ url_for('main.how_to_use') }}">How to Use</a>
+                {% if current_user.is_authenticated %}
+                <a class="btn btn-primary rounded-pill" href="{{ url_for('main.dashboard') }}">Go to Dashboard</a>
+                {% else %}
+                <a class="btn btn-primary rounded-pill" href="{{ url_for('main.register') }}">Create Account</a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

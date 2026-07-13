@@ -306,6 +306,16 @@ def task_icon_filter(stored: str | None, title: str = "") -> str:
     return resolve_task_icon(stored, title)
 
 
+@main.route("/about")
+def about():
+    return render_template("about.html")
+
+
+@main.route("/how-to-use")
+def how_to_use():
+    return render_template("how_to_use.html")
+
+
 @main.route("/")
 @login_required
 def dashboard():
