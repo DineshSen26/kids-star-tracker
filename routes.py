@@ -23,6 +23,7 @@ from flask import (
 )
 from flask_login import current_user, login_required, login_user, logout_user
 from sqlalchemy import func
+from sqlalchemy.orm import joinedload
 from werkzeug.security import check_password_hash, generate_password_hash
 
 from models import (
@@ -42,6 +43,7 @@ from task_icons import (
     suggest_task_icon,
     suggest_task_icons,
 )
+from stats_service import build_dashboard_payload, totals_for_kids
 
 main = Blueprint("main", __name__)
 
@@ -162,9 +164,13 @@ def best_streak(kid: Kid) -> int:
 
 
 def badges_for(kid: Kid, total: int) -> list[str]:
-    task_names = " ".join(
-        c.task.title.lower() for c in kid.completions if c.completed
-    )
+    titles = [
+        title.lower()
+        for title, in db.session.query(Task.title)
+        .join(Completion)
+        .filter(Completion.kid_id == kid.id, Completion.completed.is_(True))
+    ]
+    task_names = " ".join(titles)
     badges = []
     if total >= 1:
         badges.append("First Star")
@@ -194,7 +200,8 @@ def average_stars(kid: Kid, total: int) -> float:
 
 def recent_completions(kid: Kid, limit: int = 5) -> list[Completion]:
     return (
-        Completion.query.filter_by(kid_id=kid.id, completed=True)
+        Completion.query.options(joinedload(Completion.task))
+        .filter_by(kid_id=kid.id, completed=True)
         .order_by(Completion.date.desc(), Completion.id.desc())
         .limit(limit)
         .all()
@@ -221,17 +228,6 @@ def kid_stats(kid: Kid) -> dict:
         "average": average_stars(kid, total),
         "badges": badges_for(kid, total),
         "recent": recent_completions(kid),
-    }
-
-
-def chart_data(kid: Kid) -> dict:
-    days = [today() - timedelta(days=i) for i in range(6, -1, -1)]
-    daily = [stars_for_period(kid, day, day) for day in days]
-    return {
-        "labels": [day.strftime("%a") for day in days],
-        "daily": daily,
-        "weekly": [sum(daily[max(0, index - 6) : index + 1]) for index in range(7)],
-        "monthly": [total_stars(kid) for _ in days],
     }
 
 
@@ -319,7 +315,8 @@ def how_to_use():
 @main.route("/")
 @login_required
 def dashboard():
-    stats = [kid_stats(kid) for kid in user_kids()]
+    kids_list = user_kids()
+    stats, chart_payload = build_dashboard_payload(kids_list)
     leaderboard = sorted(stats, key=lambda item: item["total"], reverse=True)
     difference = (
         abs(leaderboard[0]["total"] - leaderboard[1]["total"])
@@ -331,7 +328,7 @@ def dashboard():
         stats=stats,
         leaderboard=leaderboard,
         difference=difference,
-        chart_payload={item["kid"].name: chart_data(item["kid"]) for item in stats},
+        chart_payload=chart_payload,
     )
 
 
@@ -624,8 +621,8 @@ def rewards():
         .order_by(Kid.name, Reward.required_stars)
         .all()
     )
-    stats = [kid_stats(kid) for kid in kids_list]
-    stats_by_kid = {item["kid"].id: item for item in stats}
+    totals = totals_for_kids(kids_list)
+    stats_by_kid = {kid.id: {"total": totals.get(kid.id, 0)} for kid in kids_list}
     return render_template(
         "rewards.html",
         rewards=rewards_list,
@@ -678,7 +675,11 @@ def history():
     )
     kid_ids = [kid.id for kid in user_kids()]
     completions = (
-        Completion.query.filter(
+        Completion.query.options(
+            joinedload(Completion.task),
+            joinedload(Completion.kid),
+        )
+        .filter(
             Completion.kid_id.in_(kid_ids),
             Completion.date >= start,
             Completion.completed.is_(True),
@@ -687,7 +688,8 @@ def history():
         .all()
     )
     transactions = (
-        Transaction.query.filter(
+        Transaction.query.options(joinedload(Transaction.kid))
+        .filter(
             Transaction.kid_id.in_(kid_ids),
             Transaction.created_at >= datetime.combine(start, datetime.min.time()),
         )
@@ -711,7 +713,8 @@ def export_history():
     writer = csv.writer(output)
     writer.writerow(["Date", "Kid", "Type", "Description", "Stars"])
     for row in (
-        Transaction.query.filter(Transaction.kid_id.in_(kid_ids))
+        Transaction.query.options(joinedload(Transaction.kid))
+        .filter(Transaction.kid_id.in_(kid_ids))
         .order_by(Transaction.created_at.desc())
         .all()
     ):

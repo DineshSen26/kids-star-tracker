@@ -110,6 +110,12 @@ postgresql://user:password@host/dbname?sslmode=require
 4. Set `SEED_DEMO_DATA=false` for production.
 5. Save and redeploy.
 
+### Performance (production)
+
+- Use Neon's **pooled** `DATABASE_URL` (hostname contains `-pooler`).
+- Static assets send `Cache-Control` headers from the app; in Cloudflare add a cache rule for `/static/*` (Edge TTL: 1 month).
+- Dashboard stats are batched server-side; Chart.js loads only on the dashboard page.
+
 ## Screenshots
 
 Add screenshots here after running the app:

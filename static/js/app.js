@@ -189,6 +189,7 @@ function setupTaskIconPicker({
     suggestionsContainer,
     suggestUrl,
     rowElement,
+    loadOnInit = true,
 }) {
     let debounceTimer;
 
@@ -213,12 +214,25 @@ function setupTaskIconPicker({
         applyIcons(icons, nextIcon);
     };
 
+    const showCurrentSelection = () => {
+        const selectedIcon = hiddenInput?.value || "fa-solid fa-star";
+        setSelectedIcon(selectedIcon, hiddenInput, previewElement, suggestionsContainer);
+        updatePreviewInRow(selectedIcon);
+        if (suggestionsContainer) {
+            applyIcons([selectedIcon], selectedIcon);
+        }
+    };
+
     titleInput.addEventListener("input", () => {
         clearTimeout(debounceTimer);
         debounceTimer = setTimeout(refreshSuggestions, 250);
     });
 
-    refreshSuggestions();
+    if (loadOnInit) {
+        refreshSuggestions();
+    } else {
+        showCurrentSelection();
+    }
 }
 
 function initTaskIconPickers() {
@@ -241,6 +255,7 @@ function initTaskIconPickers() {
             suggestionsContainer: form.querySelector(".edit-icon-suggestions"),
             suggestUrl: document.querySelector(".task-icon-picker")?.dataset.iconSuggestUrl,
             rowElement: form.closest("tr"),
+            loadOnInit: false,
         });
     });
 }

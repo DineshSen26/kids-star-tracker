@@ -3,7 +3,7 @@ from __future__ import annotations
 import os
 from datetime import datetime, timedelta
 
-from flask import Flask
+from flask import Flask, request
 from flask_login import LoginManager
 from flask_migrate import Migrate
 from sqlalchemy import inspect, text
@@ -12,12 +12,7 @@ from werkzeug.security import generate_password_hash
 
 from models import Completion, Kid, Reward, Task, Transaction, User, db
 from routes import main, today
-from task_icons import (
-    DEFAULT_TASK_ICON,
-    is_stored_picture,
-    is_task_icon,
-    suggest_task_icon,
-)
+from task_icons import suggest_task_icon
 
 
 login_manager = LoginManager()
@@ -43,6 +38,14 @@ def load_user(user_id: str) -> User | None:
 
 LEGACY_TABLES = ("completion", "child", "task", "reward")
 
+PERFORMANCE_INDEXES = (
+    ("ix_transactions_kid_created", "transactions", "kid_id, created_at"),
+    ("ix_completions_kid_date", "completions", "kid_id, date"),
+    ("ix_completions_kid_date_completed", "completions", "kid_id, date, completed"),
+    ("ix_tasks_kid_active", "tasks", "kid_id, active"),
+    ("ix_tasks_user_id", "tasks", "user_id"),
+)
+
 
 def drop_legacy_schema_if_needed() -> None:
     """Remove pre-multi-user tables that block PostgreSQL schema creation."""
@@ -66,6 +69,30 @@ def drop_legacy_schema_if_needed() -> None:
     db.session.commit()
 
 
+def ensure_performance_indexes() -> None:
+    inspector = inspect(db.engine)
+    if "transactions" not in inspector.get_table_names():
+        return
+
+    existing = {
+        index["name"]
+        for index in inspector.get_indexes("transactions")
+    }
+    for table_name in ("completions", "tasks"):
+        if table_name in inspector.get_table_names():
+            existing.update(
+                index["name"] for index in inspector.get_indexes(table_name)
+            )
+
+    for index_name, table_name, columns in PERFORMANCE_INDEXES:
+        if index_name in existing:
+            continue
+        db.session.execute(
+            text(f"CREATE INDEX IF NOT EXISTS {index_name} ON {table_name} ({columns})")
+        )
+    db.session.commit()
+
+
 def migrate_task_icons_if_needed() -> None:
     inspector = inspect(db.engine)
     if "tasks" not in inspector.get_table_names():
@@ -78,9 +105,17 @@ def migrate_task_icons_if_needed() -> None:
         )
         db.session.commit()
 
-    for task in Task.query.all():
-        if is_stored_picture(task.icon) or not task.icon or not is_task_icon(task.icon):
-            task.icon = suggest_task_icon(task.title)
+    stale_tasks = Task.query.filter(
+        (Task.icon.like("http%"))
+        | (Task.icon == "")
+        | (Task.icon.is_(None))
+        | (~Task.icon.like("fa-%"))
+    ).all()
+    if not stale_tasks:
+        return
+
+    for task in stale_tasks:
+        task.icon = suggest_task_icon(task.title)
     db.session.commit()
 
 
@@ -88,6 +123,7 @@ def prepare_database() -> None:
     drop_legacy_schema_if_needed()
     db.create_all()
     migrate_task_icons_if_needed()
+    ensure_performance_indexes()
 
 
 def create_app() -> Flask:
@@ -100,6 +136,17 @@ def create_app() -> Flask:
     )
     app.config["SQLALCHEMY_DATABASE_URI"] = database_uri(app.root_path)
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+
+    engine_options = {"pool_pre_ping": True}
+    if not app.config["SQLALCHEMY_DATABASE_URI"].startswith("sqlite"):
+        engine_options.update(
+            {
+                "pool_recycle": 300,
+                "pool_size": int(os.environ.get("DB_POOL_SIZE", "5")),
+                "max_overflow": int(os.environ.get("DB_MAX_OVERFLOW", "2")),
+            }
+        )
+    app.config["SQLALCHEMY_ENGINE_OPTIONS"] = engine_options
 
     app.config["GOOGLE_CLIENT_ID"] = os.environ.get("GOOGLE_CLIENT_ID", "")
     app.config["GOOGLE_CLIENT_SECRET"] = os.environ.get("GOOGLE_CLIENT_SECRET", "")
@@ -122,6 +169,12 @@ def create_app() -> Flask:
     Migrate(app, db)
 
     app.register_blueprint(main)
+
+    @app.after_request
+    def add_static_cache_headers(response):
+        if request.path.startswith("/static/"):
+            response.headers["Cache-Control"] = "public, max-age=2592000, immutable"
+        return response
 
     with app.app_context():
         prepare_database()

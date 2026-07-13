@@ -1,0 +1,109 @@
+/* Font Awesome 6 subset — only icons used by Kids Star Tracker */
+@font-face {
+    font-family: "Font Awesome 6 Brands";
+    font-style: normal;
+    font-weight: 400;
+    font-display: swap;
+    src: url("https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/webfonts/fa-brands-400.woff2") format("woff2");
+}
+
+@font-face {
+    font-family: "Font Awesome 6 Free";
+    font-style: normal;
+    font-weight: 900;
+    font-display: swap;
+    src: url("https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/webfonts/fa-solid-900.woff2") format("woff2");
+}
+
+.fa-solid,
+.fas {
+    font-family: "Font Awesome 6 Free";
+    font-weight: 900;
+    -moz-osx-font-smoothing: grayscale;
+    -webkit-font-smoothing: antialiased;
+    display: inline-block;
+    font-style: normal;
+    font-variant: normal;
+    line-height: 1;
+    text-rendering: auto;
+}
+
+.fa-brands,
+.fab {
+    font-family: "Font Awesome 6 Brands";
+    font-weight: 400;
+    -moz-osx-font-smoothing: grayscale;
+    -webkit-font-smoothing: antialiased;
+    display: inline-block;
+    font-style: normal;
+    font-variant: normal;
+    line-height: 1;
+    text-rendering: auto;
+}
+
+.fa-star::before { content: "\f005"; }
+.fa-moon::before { content: "\f186"; }
+.fa-calendar-days::before { content: "\f783"; }
+.fa-heart::before { content: "\f004"; }
+.fa-bullseye::before { content: "\f140"; }
+.fa-users::before { content: "\f0c0"; }
+.fa-icons::before { content: "\f86d"; }
+.fa-mobile-screen::before { content: "\f3cf"; }
+.fa-book-open-reader::before { content: "\f5da"; }
+.fa-wand-magic-sparkles::before { content: "\e2ca"; }
+.fa-gift::before { content: "\f06b"; }
+.fa-chart-line::before { content: "\f201"; }
+.fa-fire::before { content: "\f06d"; }
+.fa-lock::before { content: "\f023"; }
+.fa-clock-rotate-left::before { content: "\f1da"; }
+.fa-child::before { content: "\f1ae"; }
+.fa-circle-check::before { content: "\f058"; }
+.fa-award::before { content: "\f559"; }
+.fa-plus::before { content: "\f067"; }
+.fa-floppy-disk::before { content: "\f0c7"; }
+.fa-trash::before { content: "\f1f8"; }
+.fa-check::before { content: "\f00c"; }
+.fa-user-plus::before { content: "\f234"; }
+.fa-unlock::before { content: "\f09c"; }
+.fa-print::before { content: "\f02f"; }
+.fa-file-csv::before { content: "\f6dd"; }
+.fa-rotate-left::before { content: "\f2ea"; }
+.fa-user-astronaut::before { content: "\f4fb"; }
+.fa-dragon::before { content: "\f6d5"; }
+.fa-cat::before { content: "\f6be"; }
+.fa-dog::before { content: "\f6d3"; }
+.fa-rocket::before { content: "\f135"; }
+.fa-book::before { content: "\f02d"; }
+.fa-pencil::before { content: "\f303"; }
+.fa-tooth::before { content: "\f5c9"; }
+.fa-broom::before { content: "\f51a"; }
+.fa-palette::before { content: "\f53f"; }
+.fa-hands-helping::before { content: "\f4c4"; }
+.fa-utensils::before { content: "\f2e7"; }
+.fa-bed::before { content: "\f236"; }
+.fa-shirt::before { content: "\f553"; }
+.fa-shower::before { content: "\f2cc"; }
+.fa-dumbbell::before { content: "\f44b"; }
+.fa-bicycle::before { content: "\f206"; }
+.fa-music::before { content: "\f001"; }
+.fa-gamepad::before { content: "\f11b"; }
+.fa-puzzle-piece::before { content: "\f12e"; }
+.fa-seedling::before { content: "\f4d8"; }
+.fa-sink::before { content: "\e06d"; }
+.fa-plate-wheat::before { content: "\e55a"; }
+.fa-apple-whole::before { content: "\f5d1"; }
+.fa-person-running::before { content: "\f70c"; }
+.fa-pills::before { content: "\f484"; }
+.fa-face-smile::before { content: "\f118"; }
+.fa-glass-water::before { content: "\e4f4"; }
+.fa-carrot::before { content: "\f787"; }
+.fa-cookie-bite::before { content: "\f564"; }
+.fa-hand-sparkles::before { content: "\e05d"; }
+.fa-soap::before { content: "\e06e"; }
+.fa-school::before { content: "\f549"; }
+.fa-backpack::before { content: "\f5d4"; }
+.fa-heart-pulse::before { content: "\f21e"; }
+.fa-hands-praying::before { content: "\f684"; }
+.fa-place-of-worship::before { content: "\f67f"; }
+
+.fa-google::before { content: "\f1a0"; }
