@@ -10,7 +10,16 @@ from sqlalchemy import inspect, text
 from werkzeug.middleware.proxy_fix import ProxyFix
 from werkzeug.security import generate_password_hash
 
-from models import Completion, Kid, Reward, Task, Transaction, User, db
+from models import (
+    Completion,
+    Kid,
+    PasswordResetToken,
+    Reward,
+    Task,
+    Transaction,
+    User,
+    db,
+)
 from routes import main, today
 from task_icons import suggest_task_icon
 
@@ -119,9 +128,17 @@ def migrate_task_icons_if_needed() -> None:
     db.session.commit()
 
 
+def ensure_password_reset_tokens_table() -> None:
+    inspector = inspect(db.engine)
+    if "password_reset_tokens" in inspector.get_table_names():
+        return
+    PasswordResetToken.__table__.create(db.engine, checkfirst=True)
+
+
 def prepare_database() -> None:
     drop_legacy_schema_if_needed()
     db.create_all()
+    ensure_password_reset_tokens_table()
     migrate_task_icons_if_needed()
     ensure_performance_indexes()
 
