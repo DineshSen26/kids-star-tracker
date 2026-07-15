@@ -218,6 +218,7 @@ def create_app() -> Flask:
         "true",
         "yes",
     )
+    app.config["MAIL_TIMEOUT"] = int(os.environ.get("MAIL_TIMEOUT", "10"))
 
     app.config["SEED_DEMO_DATA"] = os.environ.get("SEED_DEMO_DATA", "true").lower() in (
         "1",

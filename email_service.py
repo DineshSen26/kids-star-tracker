@@ -5,13 +5,32 @@ from email.message import EmailMessage
 
 from flask import Flask, current_app
 
+PLACEHOLDER_MAIL_HOSTS = {
+    "smtp.example.com",
+    "example.com",
+    "localhost",
+    "127.0.0.1",
+}
+
+
+def _mail_server(app: Flask) -> str:
+    return (app.config.get("MAIL_SERVER") or "").strip().lower()
+
 
 def mail_configured(app: Flask | None = None) -> bool:
     app = app or current_app
-    return bool(
-        app.config.get("MAIL_SERVER")
-        and app.config.get("MAIL_DEFAULT_SENDER")
-    )
+    server = _mail_server(app)
+    sender = (app.config.get("MAIL_DEFAULT_SENDER") or "").strip()
+    username = (app.config.get("MAIL_USERNAME") or "").strip()
+    password = (app.config.get("MAIL_PASSWORD") or "").strip()
+
+    if not server or not sender:
+        return False
+    if server in PLACEHOLDER_MAIL_HOSTS or server.endswith(".example.com"):
+        return False
+    if not username or not password:
+        return False
+    return True
 
 
 def send_email(to: str, subject: str, body_text: str, body_html: str | None = None) -> None:
@@ -30,13 +49,14 @@ def send_email(to: str, subject: str, body_text: str, body_html: str | None = No
     username = app.config.get("MAIL_USERNAME") or None
     password = app.config.get("MAIL_PASSWORD") or None
     use_tls = app.config.get("MAIL_USE_TLS", True)
-    port = app.config.get("MAIL_PORT", 587)
+    port = int(app.config.get("MAIL_PORT", 587))
     server_host = app.config["MAIL_SERVER"]
+    timeout = int(app.config.get("MAIL_TIMEOUT", 10))
 
     if port == 465:
-        smtp = smtplib.SMTP_SSL(server_host, port)
+        smtp: smtplib.SMTP = smtplib.SMTP_SSL(server_host, port, timeout=timeout)
     else:
-        smtp = smtplib.SMTP(server_host, port)
+        smtp = smtplib.SMTP(server_host, port, timeout=timeout)
         if use_tls:
             smtp.starttls()
 
