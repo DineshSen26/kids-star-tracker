@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import re
 import smtplib
 from email.message import EmailMessage
 
@@ -14,6 +15,8 @@ PLACEHOLDER_MAIL_HOSTS = {
 }
 
 RESEND_API_URL = "https://api.resend.com/emails"
+EMAIL_ONLY_RE = re.compile(r"^[^<>\s@]+@[^<>\s@]+\.[^<>\s@]+$")
+NAMED_EMAIL_RE = re.compile(r"^[^<>]+<[^<>\s@]+@[^<>\s@]+\.[^<>\s@]+>$")
 
 
 def _resend_api_key(app: Flask) -> str:
@@ -21,7 +24,37 @@ def _resend_api_key(app: Flask) -> str:
 
 
 def _mail_sender(app: Flask) -> str:
-    return (app.config.get("MAIL_DEFAULT_SENDER") or "").strip()
+    return normalize_mail_sender(
+        app.config.get("MAIL_DEFAULT_SENDER") or "",
+        app.config.get("APP_NAME", "CheerSteps"),
+    )
+
+
+def normalize_mail_sender(raw: str, app_name: str = "CheerSteps") -> str:
+    sender = (raw or "").strip()
+    if not sender:
+        raise ValueError("MAIL_DEFAULT_SENDER is not set.")
+
+    if (
+        (sender.startswith('"') and sender.endswith('"'))
+        or (sender.startswith("'") and sender.endswith("'"))
+    ):
+        sender = sender[1:-1].strip()
+
+    if EMAIL_ONLY_RE.match(sender) or NAMED_EMAIL_RE.match(sender):
+        return sender
+
+    if "@" in sender and "<" not in sender:
+        local, domain = sender.rsplit("@", 1)
+        local = local.strip()
+        domain = domain.strip()
+        if local and domain:
+            return f"{local}@{domain}"
+
+    raise ValueError(
+        "MAIL_DEFAULT_SENDER must look like onboarding@resend.dev "
+        f'or {app_name} <onboarding@resend.dev>.'
+    )
 
 
 def _mail_server(app: Flask) -> str:
@@ -30,21 +63,34 @@ def _mail_server(app: Flask) -> str:
 
 def resend_configured(app: Flask | None = None) -> bool:
     app = app or current_app
-    return bool(_resend_api_key(app) and _mail_sender(app))
+    if not _resend_api_key(app):
+        return False
+    try:
+        normalize_mail_sender(
+            app.config.get("MAIL_DEFAULT_SENDER") or "",
+            app.config.get("APP_NAME", "CheerSteps"),
+        )
+        return True
+    except ValueError:
+        return False
 
 
 def smtp_configured(app: Flask | None = None) -> bool:
     app = app or current_app
     server = _mail_server(app)
-    sender = _mail_sender(app)
     username = (app.config.get("MAIL_USERNAME") or "").strip()
     password = (app.config.get("MAIL_PASSWORD") or "").strip()
 
-    if not server or not sender:
+    if not server or not username or not password:
         return False
     if server in PLACEHOLDER_MAIL_HOSTS or server.endswith(".example.com"):
         return False
-    if not username or not password:
+    try:
+        normalize_mail_sender(
+            app.config.get("MAIL_DEFAULT_SENDER") or "",
+            app.config.get("APP_NAME", "CheerSteps"),
+        )
+    except ValueError:
         return False
     return True
 
@@ -77,9 +123,21 @@ def send_via_resend(
         timeout=int(app.config.get("MAIL_TIMEOUT", 10)),
     )
     if not response.ok:
-        raise RuntimeError(
-            f"Resend API error ({response.status_code}): {response.text[:300]}"
-        )
+        detail = response.text[:300]
+        if response.status_code == 422 and "from" in detail.lower():
+            raise RuntimeError(
+                "Resend rejected the sender address. Set MAIL_DEFAULT_SENDER to "
+                "onboarding@resend.dev or CheerSteps <onboarding@resend.dev> "
+                "without quotes in Render."
+            )
+        if response.status_code == 403 and "verify a domain" in detail.lower():
+            raise RuntimeError(
+                "Resend test mode only allows sending to your own Resend account email. "
+                "Verify cheersteps.com at resend.com/domains, add the DNS records in "
+                "Cloudflare, then set MAIL_DEFAULT_SENDER to "
+                "CheerSteps <noreply@cheersteps.com>."
+            )
+        raise RuntimeError(f"Resend API error ({response.status_code}): {detail}")
 
 
 def send_via_smtp(

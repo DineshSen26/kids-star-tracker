@@ -54,10 +54,17 @@ Register at `/register` or log in at `/login`. Use **Forgot password?** on the l
 
 ```text
 RESEND_API_KEY=re_your_api_key
-MAIL_DEFAULT_SENDER=CheerSteps <onboarding@resend.dev>
+MAIL_DEFAULT_SENDER=onboarding@resend.dev
 ```
 
-Resend's test sender works immediately. Verify your own domain in Resend, then change `MAIL_DEFAULT_SENDER` to e.g. `CheerSteps <noreply@cheersteps.com>`.
+**Resend test mode:** Until you verify your domain, Resend only delivers email to the address on your Resend account (e.g. your Gmail). Forgot-password works for other users only after domain verification.
+
+**Verify cheersteps.com for production email:**
+
+1. Go to [resend.com/domains](https://resend.com/domains) → Add `cheersteps.com`
+2. Copy the DNS records (SPF + DKIM) into **Cloudflare → DNS**
+3. Wait until Resend shows the domain as **Verified**
+4. Update Render env: `MAIL_DEFAULT_SENDER=CheerSteps <noreply@cheersteps.com>`
 
 For local development, SMTP still works if configured. Without email setup, the reset link appears in the flash message when `SEED_DEMO_DATA=true`.
 
