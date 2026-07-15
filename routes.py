@@ -31,6 +31,7 @@ from models import (
     Completion,
     Invitation,
     Kid,
+    PasswordResetToken,
     Reward,
     Task,
     Transaction,
@@ -44,6 +45,7 @@ from task_icons import (
     suggest_task_icons,
 )
 from stats_service import build_dashboard_payload, totals_for_kids
+from email_service import mail_configured, send_password_reset_email
 
 main = Blueprint("main", __name__)
 
@@ -243,15 +245,19 @@ def oauth_redirect_uri() -> str:
     if configured:
         return configured
 
-    app_base_url = current_app.config.get("APP_BASE_URL", "").strip().rstrip("/")
-    if app_base_url:
-        return f"{app_base_url}/auth/google/callback"
+    return f"{app_base_url()}/auth/google/callback"
+
+
+def app_base_url() -> str:
+    configured = current_app.config.get("APP_BASE_URL", "").strip().rstrip("/")
+    if configured:
+        return configured
 
     if request.host:
         scheme = current_app.config.get("PREFERRED_URL_SCHEME", "https")
-        return f"{scheme}://{request.host}/auth/google/callback"
+        return f"{scheme}://{request.host}"
 
-    return url_for("main.google_callback", _external=True)
+    return url_for("main.dashboard", _external=True).rsplit("/", 1)[0]
 
 
 def child_session_valid(kid: Kid) -> bool:
@@ -285,14 +291,10 @@ def child_access_required(f):
 
 @main.context_processor
 def layout_data():
-    quotes = [
-        "Tiny steps make giant stars.",
-        "Kind hands earn bright stars.",
-        "Today is a great day to shine.",
-    ]
     return {
         "current_date": today().strftime("%A, %B %d, %Y"),
-        "quote": quotes[today().toordinal() % len(quotes)],
+        "quote": current_app.config.get("APP_TAGLINE", "Tiny Steps, Big Celebrations"),
+        "app_name": current_app.config.get("APP_NAME", "CheerSteps"),
         "google_login_enabled": google_login_enabled(),
     }
 
@@ -807,6 +809,86 @@ def login():
         flash("Invalid email or password.", "danger")
 
     return render_template("login.html")
+
+
+@main.route("/forgot-password", methods=["GET", "POST"])
+def forgot_password():
+    if current_user.is_authenticated:
+        return redirect(url_for("main.dashboard"))
+
+    if request.method == "POST":
+        email = request.form.get("email", "").strip().lower()
+        user = User.query.filter_by(email=email).first()
+
+        if user and user.password_hash:
+            token_value = secrets.token_urlsafe(32)
+            PasswordResetToken.query.filter_by(user_id=user.id, used_at=None).delete()
+            reset_token = PasswordResetToken(
+                user_id=user.id,
+                token=token_value,
+                expires_at=datetime.utcnow() + timedelta(hours=1),
+            )
+            db.session.add(reset_token)
+            db.session.commit()
+
+            reset_url = f"{app_base_url()}/reset-password/{token_value}"
+            if mail_configured():
+                try:
+                    send_password_reset_email(user.email, reset_url)
+                except Exception:
+                    current_app.logger.exception("Failed to send password reset email")
+                    flash("We could not send the reset email. Please try again later.", "danger")
+                    return redirect(url_for("main.forgot_password"))
+            elif current_app.debug or current_app.config.get("SEED_DEMO_DATA"):
+                current_app.logger.info("Password reset link: %s", reset_url)
+                flash(f"Dev mode reset link: {reset_url}", "info")
+
+        flash(
+            "If that email is registered, check your inbox for a password reset link.",
+            "success",
+        )
+        return redirect(url_for("main.login"))
+
+    return render_template("forgot_password.html")
+
+
+@main.route("/reset-password/<token>", methods=["GET", "POST"])
+def reset_password(token: str):
+    if current_user.is_authenticated:
+        return redirect(url_for("main.dashboard"))
+
+    reset_token = PasswordResetToken.query.filter_by(token=token).first()
+    if (
+        not reset_token
+        or reset_token.used_at
+        or reset_token.expires_at < datetime.utcnow()
+    ):
+        flash("This reset link is invalid or has expired.", "danger")
+        return redirect(url_for("main.forgot_password"))
+
+    user = db.session.get(User, reset_token.user_id)
+    if not user or not user.password_hash:
+        flash("This reset link is invalid or has expired.", "danger")
+        return redirect(url_for("main.forgot_password"))
+
+    if request.method == "POST":
+        password = request.form.get("password", "")
+        confirm = request.form.get("confirm_password", "")
+
+        if len(password) < 6:
+            flash("Password must be at least 6 characters.", "danger")
+            return redirect(url_for("main.reset_password", token=token))
+        if password != confirm:
+            flash("Passwords do not match.", "danger")
+            return redirect(url_for("main.reset_password", token=token))
+
+        user.password_hash = generate_password_hash(password)
+        reset_token.used_at = datetime.utcnow()
+        db.session.commit()
+        flash("Your password has been updated. You can log in now.", "success")
+        return redirect(url_for("main.login"))
+
+    return render_template("reset_password.html", token=token)
 
 
 @main.route("/login/google")

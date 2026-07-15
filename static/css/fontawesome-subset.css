@@ -1,4 +1,4 @@
-/* Font Awesome 6 subset — only icons used by Kids Star Tracker */
+/* Font Awesome 6 subset — only icons used by CheerSteps */
 @font-face {
     font-family: "Font Awesome 6 Brands";
     font-style: normal;
@@ -55,6 +55,8 @@
 .fa-chart-line::before { content: "\f201"; }
 .fa-fire::before { content: "\f06d"; }
 .fa-lock::before { content: "\f023"; }
+.fa-envelope::before { content: "\f0e0"; }
+.fa-key::before { content: "\f084"; }
 .fa-clock-rotate-left::before { content: "\f1da"; }
 .fa-child::before { content: "\f1ae"; }
 .fa-circle-check::before { content: "\f058"; }

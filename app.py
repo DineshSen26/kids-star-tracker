@@ -152,7 +152,22 @@ def create_app() -> Flask:
     app.config["GOOGLE_CLIENT_SECRET"] = os.environ.get("GOOGLE_CLIENT_SECRET", "")
     app.config["GOOGLE_REDIRECT_URI"] = os.environ.get("GOOGLE_REDIRECT_URI", "")
     app.config["APP_BASE_URL"] = os.environ.get("APP_BASE_URL", "").rstrip("/")
+    app.config["APP_NAME"] = os.environ.get("APP_NAME", "CheerSteps")
+    app.config["APP_TAGLINE"] = os.environ.get(
+        "APP_TAGLINE", "Tiny Steps, Big Celebrations"
+    )
     app.config["PREFERRED_URL_SCHEME"] = os.environ.get("PREFERRED_URL_SCHEME", "https")
+
+    app.config["MAIL_SERVER"] = os.environ.get("MAIL_SERVER", "")
+    app.config["MAIL_PORT"] = int(os.environ.get("MAIL_PORT", "587"))
+    app.config["MAIL_USERNAME"] = os.environ.get("MAIL_USERNAME", "")
+    app.config["MAIL_PASSWORD"] = os.environ.get("MAIL_PASSWORD", "")
+    app.config["MAIL_DEFAULT_SENDER"] = os.environ.get("MAIL_DEFAULT_SENDER", "")
+    app.config["MAIL_USE_TLS"] = os.environ.get("MAIL_USE_TLS", "true").lower() in (
+        "1",
+        "true",
+        "yes",
+    )
 
     app.config["SEED_DEMO_DATA"] = os.environ.get("SEED_DEMO_DATA", "true").lower() in (
         "1",

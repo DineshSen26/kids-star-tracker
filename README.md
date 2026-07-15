@@ -1,10 +1,11 @@
-# Kids Star Tracker
+# CheerSteps
 
-A colorful Flask application for families to track stars, chores, rewards, badges, history, and streaks for up to 5 kids per account.
+**Tiny Steps, Big Celebrations** — a colorful Flask app for families to track stars, chores, rewards, badges, history, and streaks for up to 5 kids per account.
 
 ## Features
 
 - Multi-user accounts with email/password registration and Google OAuth.
+- Forgot-password email reset for email/password accounts.
 - Up to 5 kids per parent account with avatars, ages, and optional PIN login.
 - Tasks duplicated per kid (no shared "Both" rows).
 - Transaction-based star ledger for balances, redemptions, and undo.
@@ -45,7 +46,22 @@ Set `SEED_DEMO_DATA=false` in production so real users start with a clean databa
 
 ### Email and password
 
-Register at `/register` or log in at `/login`.
+Register at `/register` or log in at `/login`. Use **Forgot password?** on the login page to request a reset link.
+
+### Forgot password
+
+Configure SMTP in your environment (see `.env.example`). In local dev without SMTP, the reset link is shown in the flash message when `SEED_DEMO_DATA=true`.
+
+```text
+MAIL_SERVER=smtp.example.com
+MAIL_PORT=587
+MAIL_USERNAME=your-smtp-username
+MAIL_PASSWORD=your-smtp-password
+MAIL_DEFAULT_SENDER=CheerSteps <noreply@cheersteps.com>
+MAIL_USE_TLS=true
+```
+
+Reset links expire after 1 hour. Google-only accounts must continue using Google sign-in.
 
 ### Google OAuth (production)
 
@@ -55,8 +71,8 @@ Set these environment variables:
 SECRET_KEY=replace-with-a-long-random-secret
 GOOGLE_CLIENT_ID=your-google-oauth-client-id
 GOOGLE_CLIENT_SECRET=your-google-oauth-client-secret
-APP_BASE_URL=https://kiddostars.uk
-GOOGLE_REDIRECT_URI=https://kiddostars.uk/auth/google/callback
+APP_BASE_URL=https://cheersteps.com
+GOOGLE_REDIRECT_URI=https://cheersteps.com/auth/google/callback
 PREFERRED_URL_SCHEME=https
 SEED_DEMO_DATA=false
 ```
@@ -80,14 +96,14 @@ Recommended: deploy on Render's free web service plan.
 5. Set your production URL (custom domain example):
 
 ```text
-APP_BASE_URL=https://kiddostars.uk
-GOOGLE_REDIRECT_URI=https://kiddostars.uk/auth/google/callback
+APP_BASE_URL=https://cheersteps.com
+GOOGLE_REDIRECT_URI=https://cheersteps.com/auth/google/callback
 ```
 
 In Google Cloud Console, create an OAuth client with:
 
-- Authorized JavaScript origins: `https://kiddostars.uk`
-- Authorized redirect URIs: `https://kiddostars.uk/auth/google/callback`
+- Authorized JavaScript origins: `https://cheersteps.com`
+- Authorized redirect URIs: `https://cheersteps.com/auth/google/callback`
 
 Alternative: PythonAnywhere using `wsgi.py` as the WSGI entry point.
 
@@ -128,7 +144,6 @@ Add screenshots here after running the app:
 
 ## Future Improvements
 
-- Forgot-password email flow.
 - Parent invitations to co-manage a family account.
 - Per-child avatar uploads.
 - Calendar view and richer badge rules.

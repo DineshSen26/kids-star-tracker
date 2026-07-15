@@ -7,6 +7,9 @@
         <form method="post" class="vstack gap-3 mb-3">
             <input class="form-control form-control-lg" type="email" name="email" placeholder="Email" required autofocus>
             <input class="form-control form-control-lg" type="password" name="password" placeholder="Password" required>
+            <div class="text-end">
+                <a class="small" href="{{ url_for('main.forgot_password') }}">Forgot password?</a>
+            </div>
             <button class="btn btn-primary btn-lg rounded-pill"><i class="fa-solid fa-lock"></i> Login</button>
         </form>
         {% if google_login_enabled %}
