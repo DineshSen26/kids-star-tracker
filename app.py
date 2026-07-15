@@ -128,11 +128,44 @@ def migrate_task_icons_if_needed() -> None:
     db.session.commit()
 
 
+PASSWORD_RESET_COLUMNS = {
+    "user_id": "INTEGER NOT NULL",
+    "token": "VARCHAR(64) NOT NULL",
+    "expires_at": "TIMESTAMP NOT NULL",
+    "used_at": "TIMESTAMP",
+    "created_at": "TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP",
+}
+
+
 def ensure_password_reset_tokens_table() -> None:
     inspector = inspect(db.engine)
-    if "password_reset_tokens" in inspector.get_table_names():
+    tables = inspector.get_table_names()
+    is_postgres = db.engine.dialect.name == "postgresql"
+
+    if "password_reset_tokens" not in tables:
+        PasswordResetToken.__table__.create(db.engine, checkfirst=True)
         return
-    PasswordResetToken.__table__.create(db.engine, checkfirst=True)
+
+    existing = {column["name"] for column in inspector.get_columns("password_reset_tokens")}
+    for column_name, column_type in PASSWORD_RESET_COLUMNS.items():
+        if column_name in existing:
+            continue
+        if is_postgres:
+            db.session.execute(
+                text(
+                    f"ALTER TABLE password_reset_tokens "
+                    f"ADD COLUMN IF NOT EXISTS {column_name} {column_type}"
+                )
+            )
+        else:
+            sqlite_type = column_type.replace(" TIMESTAMP", " DATETIME")
+            db.session.execute(
+                text(
+                    f"ALTER TABLE password_reset_tokens "
+                    f"ADD COLUMN {column_name} {sqlite_type}"
+                )
+            )
+    db.session.commit()
 
 
 def prepare_database() -> None:

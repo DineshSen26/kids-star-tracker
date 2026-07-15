@@ -822,38 +822,49 @@ def forgot_password():
 
         reset_sent = False
         if user and user.password_hash:
-            token_value = secrets.token_urlsafe(32)
-            PasswordResetToken.query.filter_by(user_id=user.id, used_at=None).delete(
-                synchronize_session=False
-            )
-            reset_token = PasswordResetToken(
-                user_id=user.id,
-                token=token_value,
-                expires_at=datetime.utcnow() + timedelta(hours=1),
-            )
-            db.session.add(reset_token)
-            db.session.commit()
-
-            reset_url = f"{app_base_url()}/reset-password/{token_value}"
-            if mail_configured():
-                try:
-                    send_password_reset_email(user.email, reset_url)
-                    reset_sent = True
-                except Exception:
-                    current_app.logger.exception("Failed to send password reset email")
-                    flash("We could not send the reset email. Please try again later.", "danger")
-                    return redirect(url_for("main.forgot_password"))
-            elif current_app.debug or current_app.config.get("SEED_DEMO_DATA"):
-                current_app.logger.info("Password reset link: %s", reset_url)
-                flash(f"Dev mode reset link: {reset_url}", "info")
-                reset_sent = True
-            else:
-                current_app.logger.warning(
-                    "Password reset requested but SMTP is not configured."
+            try:
+                PasswordResetToken.query.filter_by(user_id=user.id).delete(
+                    synchronize_session=False
                 )
+                reset_token = PasswordResetToken(
+                    user_id=user.id,
+                    token=secrets.token_urlsafe(32),
+                    expires_at=datetime.utcnow() + timedelta(hours=1),
+                )
+                db.session.add(reset_token)
+                db.session.commit()
+
+                reset_url = f"{app_base_url()}/reset-password/{reset_token.token}"
+                if mail_configured():
+                    try:
+                        send_password_reset_email(user.email, reset_url)
+                        reset_sent = True
+                    except Exception:
+                        current_app.logger.exception("Failed to send password reset email")
+                        flash(
+                            "We could not send the reset email. Please try again later.",
+                            "danger",
+                        )
+                        return redirect(url_for("main.forgot_password"))
+                elif current_app.debug or current_app.config.get("SEED_DEMO_DATA"):
+                    current_app.logger.info("Password reset link: %s", reset_url)
+                    flash(f"Dev mode reset link: {reset_url}", "info")
+                    reset_sent = True
+                else:
+                    current_app.logger.warning(
+                        "Password reset requested but SMTP is not configured."
+                    )
+                    flash(
+                        "Password reset email is not configured yet. Please contact support.",
+                        "warning",
+                    )
+                    return redirect(url_for("main.forgot_password"))
+            except Exception:
+                db.session.rollback()
+                current_app.logger.exception("Password reset failed for %s", email)
                 flash(
-                    "Password reset email is not configured yet. Please contact support.",
-                    "warning",
+                    "Something went wrong while resetting your password. Please try again.",
+                    "danger",
                 )
                 return redirect(url_for("main.forgot_password"))
 

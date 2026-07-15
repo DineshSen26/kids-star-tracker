@@ -30,10 +30,17 @@ def send_email(to: str, subject: str, body_text: str, body_html: str | None = No
     username = app.config.get("MAIL_USERNAME") or None
     password = app.config.get("MAIL_PASSWORD") or None
     use_tls = app.config.get("MAIL_USE_TLS", True)
+    port = app.config.get("MAIL_PORT", 587)
+    server_host = app.config["MAIL_SERVER"]
 
-    with smtplib.SMTP(app.config["MAIL_SERVER"], app.config.get("MAIL_PORT", 587)) as smtp:
+    if port == 465:
+        smtp = smtplib.SMTP_SSL(server_host, port)
+    else:
+        smtp = smtplib.SMTP(server_host, port)
         if use_tls:
             smtp.starttls()
+
+    with smtp:
         if username and password:
             smtp.login(username, password)
         smtp.send_message(message)
