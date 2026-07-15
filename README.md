@@ -50,16 +50,16 @@ Register at `/register` or log in at `/login`. Use **Forgot password?** on the l
 
 ### Forgot password
 
-Configure SMTP in your environment (see `.env.example`). In local dev without SMTP, the reset link is shown in the flash message when `SEED_DEMO_DATA=true`.
+**Render free tier blocks SMTP ports (25, 465, 587).** Use the [Resend](https://resend.com) HTTP API instead:
 
 ```text
-MAIL_SERVER=smtp.example.com
-MAIL_PORT=587
-MAIL_USERNAME=your-smtp-username
-MAIL_PASSWORD=your-smtp-password
-MAIL_DEFAULT_SENDER=CheerSteps <noreply@cheersteps.com>
-MAIL_USE_TLS=true
+RESEND_API_KEY=re_your_api_key
+MAIL_DEFAULT_SENDER=CheerSteps <onboarding@resend.dev>
 ```
+
+Resend's test sender works immediately. Verify your own domain in Resend, then change `MAIL_DEFAULT_SENDER` to e.g. `CheerSteps <noreply@cheersteps.com>`.
+
+For local development, SMTP still works if configured. Without email setup, the reset link appears in the flash message when `SEED_DEMO_DATA=true`.
 
 Reset links expire after 1 hour. Google-only accounts must continue using Google sign-in.
 

@@ -3,6 +3,7 @@ from __future__ import annotations
 import smtplib
 from email.message import EmailMessage
 
+import requests
 from flask import Flask, current_app
 
 PLACEHOLDER_MAIL_HOSTS = {
@@ -12,15 +13,30 @@ PLACEHOLDER_MAIL_HOSTS = {
     "127.0.0.1",
 }
 
+RESEND_API_URL = "https://api.resend.com/emails"
+
+
+def _resend_api_key(app: Flask) -> str:
+    return (app.config.get("RESEND_API_KEY") or "").strip()
+
+
+def _mail_sender(app: Flask) -> str:
+    return (app.config.get("MAIL_DEFAULT_SENDER") or "").strip()
+
 
 def _mail_server(app: Flask) -> str:
     return (app.config.get("MAIL_SERVER") or "").strip().lower()
 
 
-def mail_configured(app: Flask | None = None) -> bool:
+def resend_configured(app: Flask | None = None) -> bool:
+    app = app or current_app
+    return bool(_resend_api_key(app) and _mail_sender(app))
+
+
+def smtp_configured(app: Flask | None = None) -> bool:
     app = app or current_app
     server = _mail_server(app)
-    sender = (app.config.get("MAIL_DEFAULT_SENDER") or "").strip()
+    sender = _mail_sender(app)
     username = (app.config.get("MAIL_USERNAME") or "").strip()
     password = (app.config.get("MAIL_PASSWORD") or "").strip()
 
@@ -33,14 +49,46 @@ def mail_configured(app: Flask | None = None) -> bool:
     return True
 
 
-def send_email(to: str, subject: str, body_text: str, body_html: str | None = None) -> None:
-    app = current_app
-    if not mail_configured(app):
-        raise RuntimeError("Email is not configured.")
+def mail_configured(app: Flask | None = None) -> bool:
+    app = app or current_app
+    return resend_configured(app) or smtp_configured(app)
 
+
+def send_via_resend(
+    to: str, subject: str, body_text: str, body_html: str | None = None
+) -> None:
+    app = current_app
+    payload = {
+        "from": _mail_sender(app),
+        "to": [to],
+        "subject": subject,
+        "text": body_text,
+    }
+    if body_html:
+        payload["html"] = body_html
+
+    response = requests.post(
+        RESEND_API_URL,
+        headers={
+            "Authorization": f"Bearer {_resend_api_key(app)}",
+            "Content-Type": "application/json",
+        },
+        json=payload,
+        timeout=int(app.config.get("MAIL_TIMEOUT", 10)),
+    )
+    if not response.ok:
+        raise RuntimeError(
+            f"Resend API error ({response.status_code}): {response.text[:300]}"
+        )
+
+
+def send_via_smtp(
+    to: str, subject: str, body_text: str, body_html: str | None = None
+) -> None:
+    app = current_app
     message = EmailMessage()
     message["Subject"] = subject
-    message["From"] = app.config["MAIL_DEFAULT_SENDER"]
+    message["From"] = _mail_sender(app)
     message["To"] = to
     message.set_content(body_text)
     if body_html:
@@ -64,6 +112,18 @@ def send_email(to: str, subject: str, body_text: str, body_html: str | None = No
         if username and password:
             smtp.login(username, password)
         smtp.send_message(message)
+
+
+def send_email(to: str, subject: str, body_text: str, body_html: str | None = None) -> None:
+    app = current_app
+    if not mail_configured(app):
+        raise RuntimeError("Email is not configured.")
+
+    if resend_configured(app):
+        send_via_resend(to, subject, body_text, body_html)
+        return
+
+    send_via_smtp(to, subject, body_text, body_html)
 
 
 def send_password_reset_email(to: str, reset_url: str) -> None:
